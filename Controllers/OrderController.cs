@@ -6,11 +6,15 @@ namespace SportsStore.Controllers
     {
         private IOrderRepository repository;
         private Cart cart;
-        public OrderController(IOrderRepository repoService, Cart cartService)
+        private readonly ILogger<OrderController> _logger;
+
+        public OrderController(IOrderRepository repoService, Cart cartService, ILogger<OrderController> logger)
         {
             repository = repoService;
             cart = cartService;
+            _logger = logger;
         }
+        
         public ViewResult Checkout() => View(new Order());
         [HttpPost]
         public IActionResult Checkout(Order order)
@@ -24,6 +28,7 @@ namespace SportsStore.Controllers
                 order.Lines = cart.Lines.ToArray();
                 repository.SaveOrder(order);
                 cart.Clear();
+                _logger.LogInformation($"New Order by {order.Name}");
                 return RedirectToPage("/Completed", new { orderId = order.OrderID });
             }
             else

@@ -8,11 +8,14 @@ namespace SportsStore.Controllers
     {
         private UserManager<IdentityUser> userManager;
         private SignInManager<IdentityUser> signInManager;
+        private readonly ILogger<AccountController> _logger;
         public AccountController(UserManager<IdentityUser> userMgr,
-                SignInManager<IdentityUser> signInMgr)
+                SignInManager<IdentityUser> signInMgr,
+                ILogger<AccountController> logger)
         {
             userManager = userMgr;
             signInManager = signInMgr;
+            _logger = logger;
         }
         public ViewResult Login(string returnUrl)
         {
@@ -35,6 +38,7 @@ namespace SportsStore.Controllers
                     if ((await signInManager.PasswordSignInAsync(user,
                             loginModel.Password, false, false)).Succeeded)
                     {
+                        _logger.LogWarning($"{loginModel.Name} has login by Admin");
                         return Redirect(loginModel?.ReturnUrl ?? "/Admin");
                     }
                 }
