@@ -9,6 +9,10 @@
     {
       "library": "font-awesome@5.15.4",
       "destination": "wwwroot/lib/font-awesome"
+    },
+    {
+      "library": "bootstrap@5.3.8",
+      "destination": "wwwroot/lib/bootstrap/"
     }
   ]
 }
