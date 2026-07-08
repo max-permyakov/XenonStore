@@ -2,19 +2,20 @@
 using SportsStore.Models;
 namespace SportsStore.Controllers
 {
+    [Route("Order/[action]")]
     public class OrderController : Controller
     {
         private IOrderRepository repository;
         private Cart cart;
         private readonly ILogger<OrderController> _logger;
-
+        
         public OrderController(IOrderRepository repoService, Cart cartService, ILogger<OrderController> logger)
         {
             repository = repoService;
             cart = cartService;
             _logger = logger;
         }
-        
+        [HttpGet]
         public ViewResult Checkout() => View(new Order());
         [HttpPost]
         public IActionResult Checkout(Order order)

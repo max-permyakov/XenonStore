@@ -19,6 +19,10 @@ namespace SportsStore.Controllers
             repository = repo;
             cache = distributedCache;
         }
+        [Route("{category}/Page{productPage:int}")]
+        [Route("Page{productPage:int}")]
+        [Route("{category}")]
+        [Route("")]
         public async Task<ViewResult> Index(string? category, int productPage = 1)
         {
             string cacheKey = $"Products_{category ?? "all"}_{productPage}";
@@ -45,8 +49,8 @@ namespace SportsStore.Controllers
                     },
                     CurrentCategory = category
                 };
-                await cache.SetRecordAsync(cacheKey, model);
-                _logger.LogInformation($"Success Add Page{productPage} for category {category} in cache");
+                await cache.SetRecordAsync(cacheKey, model,TimeSpan.FromMinutes(3));
+                _logger.LogInformation($"Success Add Page{productPage} for category {category} to cache");
             }
             return View(model);
             

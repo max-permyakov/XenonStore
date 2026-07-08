@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SportsStore.Models.ViewModels;
 namespace SportsStore.Controllers
 {
+    [Route("Account/[action]")]
     public class AccountController : Controller
     {
         private UserManager<IdentityUser> userManager;
@@ -17,6 +18,7 @@ namespace SportsStore.Controllers
             signInManager = signInMgr;
             _logger = logger;
         }
+        [HttpGet]
         public ViewResult Login(string returnUrl)
         {
             return View(new LoginModel
@@ -48,6 +50,7 @@ namespace SportsStore.Controllers
         }
 
         [Authorize]
+        [HttpGet]
         public async Task<RedirectResult> Logout(string returnUrl = "/")
         {
             await signInManager.SignOutAsync();
