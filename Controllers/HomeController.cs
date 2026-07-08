@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using SportsStore.Models;
 using SportsStore.Models.ViewModels;
 using SportsStore.Pages.Admin;
+using SportsStore.Infrastructure;
 namespace SportsStore.Controllers
 {
     public class HomeController : Controller
@@ -10,17 +12,19 @@ namespace SportsStore.Controllers
         private  ILogger _logger;
         private IStoreRepository repository;
         public int PageSize = 4;
-        private readonly IMemoryCache cache;
-        public HomeController(IStoreRepository repo, IMemoryCache memoryCache,ILogger<HomeController> logger)
+        private readonly IDistributedCache cache;
+        public HomeController(IStoreRepository repo, IDistributedCache distributedCache,ILogger<HomeController> logger)
         {
             _logger = logger;
             repository = repo;
-            cache = memoryCache;
+            cache = distributedCache;
         }
-        public ViewResult Index(string? category, int productPage = 1)
+        public async Task<ViewResult> Index(string? category, int productPage = 1)
         {
             string cacheKey = $"Products_{category ?? "all"}_{productPage}";
-            if(!cache.TryGetValue(cacheKey,out ProductsListViewModel model))
+            ProductsListViewModel? model = await cache.GetRecordAsync<ProductsListViewModel>(cacheKey);
+
+            if(model==null)
             {
                 var products = repository.Products
                     .Where(p => category == null || p.Category == category)
@@ -41,7 +45,7 @@ namespace SportsStore.Controllers
                     },
                     CurrentCategory = category
                 };
-                cache.Set(cacheKey, model,TimeSpan.FromMinutes(5));
+                await cache.SetRecordAsync(cacheKey, model);
                 _logger.LogInformation($"Success Add Page{productPage} for category {category} in cache");
             }
             return View(model);

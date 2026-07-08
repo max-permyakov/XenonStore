@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.HostFiltering;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using SportsStore.Models;
 using System.Runtime.InteropServices;
-using Microsoft.AspNetCore.HostFiltering;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
@@ -13,6 +14,12 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<StoreDbContext>(opts => {
     opts.UseSqlServer(
         builder.Configuration["ConnectionStrings:SportsStoreConnection"]);
+});
+builder.Services.AddDistributedSqlServerCache(opts => {
+    opts.ConnectionString
+    = builder.Configuration["ConnectionStrings:CacheConnection"];
+    opts.SchemaName = "dbo";
+    opts.TableName = "DataCache";
 });
 //builder.Services.Configure<HostFilteringOptions>(opts => {
 //    opts.AllowedHosts.Clear();
@@ -27,7 +34,7 @@ builder.Services.AddScoped<IStoreRepository, EFStoreRepository>();
 
 
 builder.Services.AddRazorPages();
-builder.Services.AddDistributedMemoryCache();
+builder.Services.AddMemoryCache();
 builder.Services.AddSession();
 builder.Services.AddScoped<Cart>(sp => SessionCart.GetCart(sp));
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
