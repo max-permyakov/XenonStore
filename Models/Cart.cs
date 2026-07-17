@@ -24,6 +24,17 @@
         }
         public virtual void RemoveLine(Product product) =>
             Lines.RemoveAll(l => l.Product.ProductID == product.ProductID);
+        public virtual void DecreaseItem(Product product)
+        {
+            CartLine? line = Lines.FirstOrDefault(l => l.Product.ProductID == product.ProductID);
+            if (line != null)
+            {
+                if (line.Quantity > 1)
+                    line.Quantity--;
+                else
+                    Lines.Remove(line);
+            }
+        }
         public decimal ComputeTotalValue() =>
             Lines.Sum(e => e.Product.Price * e.Quantity);
         public virtual void Clear() => Lines.Clear();

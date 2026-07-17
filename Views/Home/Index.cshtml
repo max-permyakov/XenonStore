@@ -1,13 +1,78 @@
-﻿@model ProductsListViewModel
-@foreach (var p in Model?.Products ?? Enumerable.Empty<Product>())
-{
-    <partial name="ProductSummary" model="p" />
+﻿@model ProductsListWithCartViewModel
 
+@{
+    ViewBag.Title = "Sports Store";
 }
 
-<div page-model="@Model?.PagingInfo" page-action="Index" page-classes-enabled="true"
-     page-class="btn" page-class-normal="btn-outline-dark"
-     page-class-selected="btn-primary" class="btn-group pull-right m-1"
-    page-class-selected="btn-primary" page-url-category="@Model?.CurrentCategory!">
+<div class="container my-4">
+    <div class="row">
+        @foreach (var item in Model.Products)
+        {
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@item.Product.Name</h5>
+                        <p class="card-text text-muted small">@item.Product.Description</p>
+                        <p class="card-text font-weight-bold text-primary">
+                            @item.Product.Price.ToString("c")
+                        </p>
 
+                        <div class="mt-auto d-flex align-items-center justify-content-between">
+                        
+                            <div class="quantity-control d-flex align-items-center">
+                                @if (item.QuantityInCart > 0)
+                                {
+                                    <form method="post" asp-page="/Cart" asp-page-handler="RemoveOne" class="d-inline">
+                                        <input type="hidden" name="productId" value="@item.Product.ProductID" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.PathAndQuery()" />
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm">−</button>
+                                    </form>
+                                    <h1 class="mx-2 badge badge-pill badge-primary text-dark" style="min-width:2rem;">
+                                        @item.QuantityInCart
+                                    </h1>
+                                    <form method="post" asp-page="/Cart" asp-page-handler="AddOne" class="d-inline">
+                                        <input type="hidden" name="productId" value="@item.Product.ProductID" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.PathAndQuery()" />
+                                        <button type="submit" class="btn btn-outline-success btn-sm">+</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form method="post" asp-page="/Cart" asp-page-handler="AddOne" class="d-inline">
+                                        <input type="hidden" name="productId" value="@item.Product.ProductID" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.PathAndQuery()" />
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-cart-plus"></i> Add
+                                        </button>
+                                    </form>
+                                }
+
+                                
+
+                                
+                            </div>
+
+                        
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+ 
+    <div class="row">
+        <div class="col-12">
+            <div page-model="@Model.PagingInfo" page-action="Index"
+                 page-url-category="@Model.CurrentCategory"
+                 page-classes-enabled="true"
+                 page-class="btn"
+                 page-class-normal="btn-outline-dark"
+                 page-class-selected="btn-primary"
+                 class="btn-group mt-3">
+            </div>
+        </div>
+    </div>
 </div>
+

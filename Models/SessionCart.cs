@@ -16,6 +16,11 @@ namespace SportsStore.Models
        
         [JsonIgnore]
         public ISession? Session { get; set; }
+        public override void DecreaseItem(Product product)
+        {
+            base.DecreaseItem(product);
+            Session?.SetJson("Cart", this);
+        }
         public override void AddItem(Product product, int quantity)
         {
             base.AddItem(product, quantity);

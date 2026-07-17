@@ -12,12 +12,15 @@ namespace SportsStore.Controllers
         private  ILogger _logger;
         private IStoreRepository repository;
         public int PageSize = 4;
-        private readonly IDistributedCache cache;
-        public HomeController(IStoreRepository repo, IDistributedCache distributedCache,ILogger<HomeController> logger)
+        
+        private readonly Cart cart;
+        public HomeController(IStoreRepository repo,ILogger<HomeController> logger, Cart cartService)
         {
             _logger = logger;
             repository = repo;
-            cache = distributedCache;
+            
+            cart = cartService;
+
         }
         [Route("{category}/Page{productPage:int}")]
         [Route("Page{productPage:int}")]
@@ -25,35 +28,36 @@ namespace SportsStore.Controllers
         [Route("")]
         public async Task<ViewResult> Index(string? category, int productPage = 1)
         {
-            string cacheKey = $"Products_{category ?? "all"}_{productPage}";
-            ProductsListViewModel? model = await cache.GetRecordAsync<ProductsListViewModel>(cacheKey);
+            var products = repository.Products
+                .Where(p => category == null || p.Category == category)
+                .OrderBy(p => p.ProductID)
+                .Skip((productPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
 
-            if(model==null)
-            {
-                var products = repository.Products
-                    .Where(p => category == null || p.Category == category)
-                   .OrderBy(p => p.ProductID)
-                   .Skip((productPage - 1) * PageSize)
-                   .Take(PageSize).ToList();
-                int totalItems = category == null
+            int totalItems = category == null
                 ? repository.Products.Count()
                 : repository.Products.Count(e => e.Category == category);
-                model = new ProductsListViewModel
+
+            var productsWithQuantity = products.Select(p => new ProductCartViewModel
+            {
+                Product = p,
+                QuantityInCart = cart.Lines.FirstOrDefault(l => l.Product.ProductID == p.ProductID)?.Quantity ?? 0
+            });
+
+            var model = new ProductsListWithCartViewModel
+            {
+                Products = productsWithQuantity,
+                PagingInfo = new PagingInfo
                 {
-                    Products = products,
-                    PagingInfo = new PagingInfo
-                    {
-                        CurrentPage = productPage,
-                        ItemsPerPage = PageSize,
-                        TotalItems = totalItems
-                    },
-                    CurrentCategory = category
-                };
-                await cache.SetRecordAsync(cacheKey, model,TimeSpan.FromMinutes(3));
-                _logger.LogInformation($"Success Add Page{productPage} for category {category} to cache");
-            }
+                    CurrentPage = productPage,
+                    ItemsPerPage = PageSize,
+                    TotalItems = totalItems
+                },
+                CurrentCategory = category
+            };
+
             return View(model);
-            
         }
     }
 }
