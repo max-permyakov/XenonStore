@@ -5,74 +5,86 @@
 }
 
 <div class="container my-4">
-    <div class="row">
-        @foreach (var item in Model.Products)
-        {
-            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">@item.Product.Name</h5>
-                        <p class="card-text text-muted small">@item.Product.Description</p>
-                        <p class="card-text font-weight-bold text-primary">
-                            @item.Product.Price.ToString("c")
-                        </p>
-
-                        <div class="mt-auto d-flex align-items-center justify-content-between">
-                        
-                            <div class="quantity-control d-flex align-items-center">
-                                @if (item.QuantityInCart > 0)
-                                {
-                                    <form method="post" asp-page="/Cart" asp-page-handler="RemoveOne" class="d-inline">
-                                        <input type="hidden" name="productId" value="@item.Product.ProductID" />
-                                        <input type="hidden" name="returnUrl" value="@Context.Request.PathAndQuery()" />
-                                        <button type="submit" class="btn btn-outline-secondary btn-sm">−</button>
-                                    </form>
-                                    <h1 class="mx-2 badge badge-pill badge-primary text-dark" style="min-width:2rem;">
-                                        @item.QuantityInCart
-                                    </h1>
-                                    <form method="post" asp-page="/Cart" asp-page-handler="AddOne" class="d-inline">
-                                        <input type="hidden" name="productId" value="@item.Product.ProductID" />
-                                        <input type="hidden" name="returnUrl" value="@Context.Request.PathAndQuery()" />
-                                        <button type="submit" class="btn btn-outline-success btn-sm">+</button>
-                                    </form>
-                                }
-                                else
-                                {
-                                    <form method="post" asp-page="/Cart" asp-page-handler="AddOne" class="d-inline">
-                                        <input type="hidden" name="productId" value="@item.Product.ProductID" />
-                                        <input type="hidden" name="returnUrl" value="@Context.Request.PathAndQuery()" />
-                                        <button type="submit" class="btn btn-primary btn-sm">
-                                            <i class="fas fa-cart-plus"></i> Add
-                                        </button>
-                                    </form>
-                                }
-
-                                
-
-                                
-                            </div>
-
-                        
-                            
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
+    <div class="row" id="product-list">
+        @await Html.PartialAsync("_ProductGridItems", Model.Products)
     </div>
 
- 
-    <div class="row">
-        <div class="col-12">
-            <div page-model="@Model.PagingInfo" page-action="Index"
-                 page-url-category="@Model.CurrentCategory"
-                 page-classes-enabled="true"
-                 page-class="btn"
-                 page-class-normal="btn-outline-dark"
-                 page-class-selected="btn-primary"
-                 class="btn-group mt-3">
-            </div>
+  
+    <div id="scroll-trigger" style="height: 1px;"></div>
+
+   
+    <div id="loading-spinner" class="text-center my-3" style="display:none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
         </div>
     </div>
 </div>
 
+@section Scripts {
+    <script>
+        let currentPage = @Model.PagingInfo.CurrentPage;
+        const pageSize = @Model.PagingInfo.ItemsPerPage;
+        let category = '@Model.CurrentCategory' || null;
+        let isLoading = false;
+        let hasMore = @(Model.PagingInfo.CurrentPage < Model.PagingInfo.TotalPages ? "true" : "false");
+        const trigger = document.getElementById('scroll-trigger');
+        const productList = document.getElementById('product-list');
+        const spinner = document.getElementById('loading-spinner');
+
+      
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && hasMore && !isLoading) {
+                loadMore();
+            }
+        }, {
+            rootMargin: '0px 0px 100px 0px'
+        });
+
+        observer.observe(trigger);
+
+        function loadMore() {
+            isLoading = true;
+            spinner.style.display = 'block';
+            const nextPage = currentPage + 1;
+            let url = `/Home/LoadMore?page=${nextPage}`;
+            if (category) {
+                url += `&category=${encodeURIComponent(category)}`;
+            }
+
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                  
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+
+                    const items = tempDiv.querySelectorAll('.col-lg-3');
+                    if (items.length) {
+                        items.forEach(el => productList.appendChild(el));
+                    } else {
+                       
+                        hasMore = false;
+                    }
+                    if (items.length < pageSize) {
+                        hasMore = false;
+                    }
+
+                    currentPage = nextPage;
+                    isLoading = false;
+                    spinner.style.display = 'none';
+
+                    if (hasMore) {
+                        observer.unobserve(trigger);
+                        observer.observe(trigger);
+                    } else {
+                        observer.disconnect();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading more products:', error);
+                    isLoading = false;
+                    spinner.style.display = 'none';
+                });
+        }
+    </script>
+}

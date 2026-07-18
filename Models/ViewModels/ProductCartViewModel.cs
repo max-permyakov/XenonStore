@@ -14,3 +14,9 @@ public class ProductsListWithCartViewModel
     public PagingInfo PagingInfo { get; set; } = new();
     public string? CurrentCategory { get; set; }
 }
+public class LoadMoreResult
+{
+    public IEnumerable<ProductCartViewModel> Products { get; set; } = Enumerable.Empty<ProductCartViewModel>();
+    public bool HasMore { get; set; }
+    public int CurrentPage { get; set; }
+}
