@@ -1,12 +1,14 @@
-using Xenon.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using Microsoft.AspNetCore.DataProtection;
-using Xenon.Infrastructure.Data;
 using Xenon.Domain.Interfaces;
+using Xenon.Domain.Interfaces.Services;
 using Xenon.Domain.Models;
+using Xenon.Infrastructure.Data;
+using Xenon.Infrastructure.Repositories;
 using Xenon.Infrastructure.Services;
 
 
@@ -63,7 +65,9 @@ try
     builder.Services.AddScoped<IStoreRepository, EFStoreRepository>();
     builder.Services.AddRazorPages();
     builder.Services.AddSession();
-    builder.Services.AddScoped<Cart>(sp => SessionCart.GetCart(sp));
+    builder.Services.AddScoped<IProductService, ProductService>();
+    builder.Services.AddScoped<ICartService, CartService>();
+    builder.Services.AddScoped<ICartStorage, SessionCartStorage>();
     builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
     builder.Services.AddScoped<IOrderRepository, EFOrderRepository>();
     builder.Services.AddServerSideBlazor();

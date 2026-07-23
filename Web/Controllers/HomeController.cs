@@ -1,72 +1,92 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
-using Xenon.Domain.Interfaces;
+using Xenon.Domain.Interfaces.Services;
 using Xenon.Domain.Models;
 using Xenon.Web.Models.ViewModels;
 
-
 namespace Xenon.Web.Controllers
 {
+    [Route("{category}/Page{productPage:int}")]
+    [Route("Page{productPage:int}")]
+    [Route("Home/LoadMore")]
+    [Route("{category}")]
+    [Route("")]
     public class HomeController : Controller
     {
-        private  ILogger _logger;
-        private IStoreRepository repository;
-        public int PageSize = 20;
-        
-        private readonly Cart cart;
-        public HomeController(IStoreRepository repo,ILogger<HomeController> logger, Cart cartService)
+        private readonly IProductService _productService;
+        private readonly ICartService _cartService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<HomeController> _logger;
+
+        public HomeController(
+            IProductService productService,
+            ICartService cartService,
+            IHttpContextAccessor httpContextAccessor,
+            ILogger<HomeController> logger)
         {
+            _productService = productService;
+            _cartService = cartService;
+            _httpContextAccessor = httpContextAccessor;
             _logger = logger;
-            repository = repo;
-            
-            cart = cartService;
-
         }
-        [Route("{category}/Page{productPage:int}")]
-        [Route("Page{productPage:int}")]
-        [Route("Home/LoadMore")]
-        [Route("{category}")]
-        [Route("")]
-        public async Task<ViewResult> Index(string? category, int productPage = 1)
+
+        private string CartId => _httpContextAccessor.HttpContext?.Session?.Id
+            ?? Guid.NewGuid().ToString();
+
+        public async Task<IActionResult> Index(string category, int page = 1)
         {
-         
-            var products = repository.Products
-                .Where(p => category == null || p.Category == category)
-                .OrderBy(p => p.ProductID)
-                .Skip((productPage - 1) * PageSize)
-                .Take(PageSize)
-                .ToList(); 
+            const int pageSize = 20;
 
-          
-            int totalItems = category == null
-                ? repository.Products.Count()
-                : repository.Products.Count(e => e.Category == category);
+            // Получаем товары с пагинацией
+            var products = await _productService.GetProductsAsync(page, pageSize, category);
+            var total = await _productService.GetTotalCountAsync(category);
 
-            var productsWithQuantity = products.Select(p => new ProductCartViewModel
-            {
-                Product = p,
-                QuantityInCart = cart.Lines
-                    .Where(l => l.Product.ProductID == p.ProductID)
-                    .Select(l => l.Quantity)
-                    .FirstOrDefault()
-            });
+            // Получаем корзину для отображения количества
+            var cart = await _cartService.GetCartAsync(CartId);
 
-            var model = new ProductsListWithCartViewModel
+            // Преобразуем товары с указанием количества в корзине
+            var productsWithQuantity = products
+                .Select(p => new ProductCartViewModel
+                {
+                    Product = p,
+                    QuantityInCart = cart.Lines
+                        .FirstOrDefault(l => l.Product.ProductID == p.ProductID)
+                        ?.Quantity ?? 0
+                })
+                .ToList();
+
+            var viewModel = new ProductsListWithCartViewModel
             {
                 Products = productsWithQuantity,
                 PagingInfo = new PagingInfo
                 {
-                    CurrentPage = productPage,
-                    ItemsPerPage = PageSize,
-                    TotalItems = totalItems
+                    CurrentPage = page,
+                    ItemsPerPage = pageSize,
+                    TotalItems = total
                 },
                 CurrentCategory = category
             };
 
-            return View(model);
+            return View(viewModel);
         }
 
-        
+        // Загрузка следующей порции товаров (для бесконечного скролла)
+        //public async Task<IActionResult> LoadMore(string category, int page)
+        //{
+        //    const int pageSize = 20;
+        //    var products = await _productService.GetProductsAsync(page, pageSize, category);
+        //    var cart = await _cartService.GetCartAsync(CartId);
+
+        //    var productsWithQuantity = products
+        //        .Select(p => new ProductCartViewModel
+        //        {
+        //            Product = p,
+        //            QuantityInCart = cart.Lines
+        //                .FirstOrDefault(l => l.Product.ProductID == p.ProductID)
+        //                ?.Quantity ?? 0
+        //        })
+        //        .ToList();
+
+        //    return PartialView("_ProductGridItems", productsWithQuantity);
+        //}
     }
 }
