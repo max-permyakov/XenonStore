@@ -1,14 +1,14 @@
-﻿using Xenon.Domain.Models;
-namespace Xenon.Domain.Interfaces
+﻿// Xenon.Domain/Interfaces/IStoreRepository.cs
+using Xenon.Domain.Models;
+
+public interface IStoreRepository
 {
-    public interface IStoreRepository
-    {
-        IQueryable<Product> Products { get; }
-        void SaveProduct(Product p);
-        void CreateProduct(Product p);
-        void DeleteProduct(Product p);
-        Task<Product> GetProductAsync(long id);
-        Task<IEnumerable<Product>> GetProductsAsync(int page, int pageSize, string category);
-        Task<int> GetTotalCountAsync(string category);
-    }
+    IQueryable<Product> Products { get; }
+
+    Task<IEnumerable<Product>> GetProductsAsync(int page, int pageSize, string? category = null);
+    Task<Product?> GetProductAsync(long id);  // может быть null
+    Task<int> GetTotalCountAsync(string? category = null);
+    void SaveProduct(Product p);
+    void CreateProduct(Product p);
+    void DeleteProduct(Product p);
 }

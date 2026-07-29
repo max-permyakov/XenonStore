@@ -70,6 +70,7 @@ try
     builder.Services.AddScoped<ICartStorage, SessionCartStorage>();
     builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
     builder.Services.AddScoped<IOrderRepository, EFOrderRepository>();
+    builder.Services.AddScoped<ProductImportService>();
     builder.Services.AddServerSideBlazor();
 
     var app = builder.Build();
@@ -108,7 +109,7 @@ try
     {
         opts.AddSupportedCultures("ru-Ru")
         .AddSupportedUICultures("ru-US")
-        .SetDefaultCulture("ru-Ru");
+        .SetDefaultCulture("en-US");
     });
 
     app.UseStaticFiles();

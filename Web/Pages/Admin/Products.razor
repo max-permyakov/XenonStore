@@ -23,11 +23,11 @@
                     <td>@p.Price.ToString("c")</td>
                     <td>
                         <NavLink class="btn btn-info btn-sm"
-                                 href="@GetDetailsUrl(p.ProductID ?? 0)">
+                                 href="@GetDetailsUrl(p.ProductID)">
                             Details
                         </NavLink>
                         <NavLink class="btn btn-warning btn-sm"
-                                 href="@GetEditUrl(p.ProductID ?? 0)">
+                                 href="@GetEditUrl(p.ProductID)">
                             Edit
                         </NavLink>
                         <button class="btn btn-danger btn-sm" @onclick="@(e=> DeleteProduct(p))">Delete</button>

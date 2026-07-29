@@ -9,13 +9,13 @@ namespace Xenon.Infrastructure.Services
         public static List<Product> GenerateProducts(int count = 100)
         {
             // Список реальных категорий, чтобы они были осмысленными
-            
+
 
             var productFaker = new Faker<Product>()
                 .RuleFor(p => p.Name, f => f.Commerce.ProductName())
                 .RuleFor(p => p.Description, f => f.Commerce.ProductDescription())
-                .RuleFor(p => p.Price, f => decimal.Parse(f.Commerce.Price(min: 1, max: 1000)))
-                .RuleFor(p => p.Category, f => f.PickRandom(CategoryData.AllCategories));
+                .RuleFor(p => p.Price, f => decimal.Parse(f.Commerce.Price(min: 1, max: 1000)));
+                //.RuleFor(p => p.Category,  f => f.PickRandom(CategoryData.AllCategories));
 
             return productFaker.Generate(count);
         }

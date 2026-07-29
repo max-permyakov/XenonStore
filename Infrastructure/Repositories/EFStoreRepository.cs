@@ -28,19 +28,33 @@ namespace Xenon.Infrastructure.Repositories
             return context.Products.FirstOrDefaultAsync(x=>x.ProductID == id);
         }
 
-        public async Task<IEnumerable<Product>> GetProductsAsync(int page, int pageSize, string category)
+        public async Task<IEnumerable<Product>> GetProductsAsync(int page, int pageSize, string? category = null)
         {
-            return  context.Products
-                .Where(p => category == null || p.Category == category)
+            var query = context.Products.AsQueryable();
+
+            if (!string.IsNullOrEmpty(category))
+            {
+               
+                query = query.Where(p => p.Category != null && p.Category.Name == category);
+            }
+
+            return await query
                 .OrderBy(p => p.ProductID)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToList();
+                .ToListAsync();
         }
 
-        public async Task<int> GetTotalCountAsync(string category)
+        public async Task<int> GetTotalCountAsync(string? category = null)
         {
-           return context.Products.Count(x => x.Category == category);
+            var query = context.Products.AsQueryable();
+
+            if (!string.IsNullOrEmpty(category))
+            {
+                query = query.Where(p => p.Category != null && p.Category.Name == category);
+            }
+
+            return await query.CountAsync();
         }
 
         public void SaveProduct(Product p)

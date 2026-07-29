@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// Xenon.Domain/Interfaces/Services/IProductService.cs
 using Xenon.Domain.Models;
 
-namespace Xenon.Domain.Interfaces.Services
+public interface IProductService
 {
-    
-        public interface IProductService
-        {
-            Task<Product?> GetProductAsync(long id);
-            Task<IEnumerable<Product?>> GetProductsAsync(int page, int pageSize, string category = null);
-            Task<int> GetTotalCountAsync(string category = null);
-        }
-    
+    Task<IEnumerable<Product>> GetProductsAsync(int page, int pageSize, string? category = null);
+    Task<Product?> GetProductAsync(long id);  // может вернуть null
+    Task<int> GetTotalCountAsync(string? category = null);
 }

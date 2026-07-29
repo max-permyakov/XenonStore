@@ -1,0 +1,16 @@
+﻿@page
+@model ImportModel
+<h4>Импорт товаров из CSV</h4>
+
+<form method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label>Выберите CSV-файл</label>
+        <input type="file" name="CsvFile" class="form-control" accept=".csv" />
+    </div>
+    <button type="submit" class="btn btn-primary mt-2">Загрузить</button>
+</form>
+
+@if (Model.ResultMessage != null)
+{
+    <div class="alert alert-info mt-3">@Model.ResultMessage</div>
+}

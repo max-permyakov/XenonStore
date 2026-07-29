@@ -1,17 +1,17 @@
-﻿@model IEnumerable<string>
+﻿@model IEnumerable<Category>
 <div class="d-grid gap-2">
     <a class=" btn btn-outline-secondary" asp-action="Index"
        asp-controller="Home" asp-route-category="">
         All
     </a>
-    @foreach (string category in Model ?? Enumerable.Empty<string>())
+    @foreach (var category in Model)
     {
-        <a class="btn @(category == ViewBag.SelectedCategory
+        <a class="btn @(category.Name == ViewBag.SelectedCategory
                                       ? "btn-primary" : "btn-outline-secondary")"
            asp-action="Index" asp-controller="Home"
-           asp-route-category="@category"
+           asp-route-category="@category.Name"
            asp-route-productPage="1">
-            @category
+            @category.Name
         </a>
     }
 </div>
