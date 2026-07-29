@@ -1,5 +1,6 @@
 ﻿// Xenon.Infrastructure/Services/ProductImportService.cs
 using CsvHelper;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
@@ -12,11 +13,16 @@ public class ProductImportService
 {
     private readonly StoreDbContext _context;
     private readonly ILogger<ProductImportService> _logger;
+    private readonly IWebHostEnvironment _webHostEnvironment;
 
-    public ProductImportService(StoreDbContext context, ILogger<ProductImportService> logger)
+    public ProductImportService(
+    StoreDbContext context,
+    ILogger<ProductImportService> logger,
+    IWebHostEnvironment webHostEnvironment) 
     {
         _context = context;
         _logger = logger;
+        _webHostEnvironment = webHostEnvironment;
     }
 
     public async Task<int> ImportFromCsvAsync(Stream csvStream)
@@ -70,11 +76,11 @@ public class ProductImportService
                 Price = price,
                 CategoryId = category.CategoryId,
                 SupplierId = defaultSupplier.SupplierId,
-                Discount = null, // не используем числовую скидку
+                Discount = null,
                 Rating = rating,
                 Currency = currency,
                 Features = record.Feature,
-                ImageUrl = GenerateImageUrl(record.Title)
+                ImageUrl = GetImageUrlForCategory(record.SubCategory, record.Title)
             };
 
             _context.Products.Add(product);
@@ -138,11 +144,6 @@ public class ProductImportService
         return category;
     }
 
-    private string GenerateImageUrl(string title)
-    {
-        var seed = Math.Abs(title.GetHashCode());
-        return $"https://picsum.photos/seed/{seed}/300/300";
-    }
     private async Task<Supplier> GetOrCreateDefaultSupplier()
     {
         const string defaultName = "Unknown Supplier";
@@ -154,5 +155,55 @@ public class ProductImportService
             await _context.SaveChangesAsync();
         }
         return supplier;
+    }
+    private readonly Dictionary<string, int> _imageIndexPerCategory = new();
+
+    // Метод для получения URL изображения
+    private string GetImageUrlForCategory(string categoryName, string productName)
+    {
+        // Нормализуем имя категории (убираем пробелы, спецсимволы)
+        var normalizedCategory = categoryName?.Trim() ?? "Uncategorized";
+        // Путь к папке с изображениями для этой категории
+        var categoryFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", normalizedCategory);
+
+        if (!Directory.Exists(categoryFolder))
+        {
+            // Если папки нет — используем общую папку или изображение по умолчанию
+            categoryFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "common");
+            if (!Directory.Exists(categoryFolder))
+            {
+                // Если и общей нет — возвращаем заглушку
+                return "/images/placeholder.jpg";
+            }
+        }
+
+        // Получаем все файлы изображений в папке (поддерживаемые расширения)
+        var imageFiles = Directory.GetFiles(categoryFolder)
+            .Where(f => new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }
+                .Contains(Path.GetExtension(f).ToLower()))
+            .ToList();
+
+        if (!imageFiles.Any())
+        {
+            // Если в папке нет изображений — возвращаем заглушку
+            return "/images/placeholder.jpg";
+        }
+
+        // Получаем или создаем счетчик для этой категории
+        if (!_imageIndexPerCategory.ContainsKey(normalizedCategory))
+        {
+            _imageIndexPerCategory[normalizedCategory] = 0;
+        }
+
+        // Выбираем файл по циклическому индексу
+        var index = _imageIndexPerCategory[normalizedCategory] % imageFiles.Count;
+        var selectedFile = imageFiles[index];
+
+        // Увеличиваем счетчик для следующего товара в этой категории
+        _imageIndexPerCategory[normalizedCategory]++;
+
+        // Возвращаем относительный URL для браузера
+        var relativePath = Path.GetRelativePath(_webHostEnvironment.WebRootPath, selectedFile);
+        return "/" + relativePath.Replace('\\', '/');
     }
 }

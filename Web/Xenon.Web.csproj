@@ -26,6 +26,11 @@
 
   <ItemGroup>
     <Folder Include="TagHelpers\" />
+    <Folder Include="wwwroot\images\Cameras &amp; Camcorders\" />
+    <Folder Include="wwwroot\images\Desktop Computers &amp; PCs\" />
+    <Folder Include="wwwroot\images\Hard Drives SSD &amp; Storage\" />
+    <Folder Include="wwwroot\images\Headphones &amp; Earbuds\" />
+    <Folder Include="wwwroot\images\Musical Instruments\" />
   </ItemGroup>
 
 </Project>
