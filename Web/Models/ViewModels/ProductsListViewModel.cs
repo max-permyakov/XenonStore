@@ -8,6 +8,6 @@ namespace Xenon.Web.Models.ViewModels
             = Enumerable.Empty<Product>();
         public PagingInfo PagingInfo { get; set; } = new();
         public string? CurrentCategory { get; set; }
-
+        public string? SearchTerm { get; set; }
     }
 }

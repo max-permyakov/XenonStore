@@ -1,18 +1,46 @@
 ﻿@model ProductsListWithCartViewModel
 
 @{
-    ViewBag.Title = "Sports Store";
+    ViewBag.Title = "Xenon";
 }
 
 <div class="container my-4">
-    <div class="row" id="product-list">
-        @await Html.PartialAsync("_ProductGridItems", Model.Products)
+    <div class="row mb-4">
+        <div class="col-md-6 mx-auto">
+            <form method="get" asp-action="Index" class="d-flex" id="searchForm">
+                <input type="hidden" name="category" value="@Model?.CurrentCategory" />
+                <input type="text"
+                       name="searchTerm"
+                       class="form-control me-2"
+                       placeholder="Search products..."
+                       value="@Model?.SearchTerm" />
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                @if (!string.IsNullOrEmpty(Model?.SearchTerm?.ToString()))
+                {
+                    <a asp-action="Index" class="btn btn-outline-secondary ms-2">Clear</a>
+                }
+            </form>
+        </div>
     </div>
 
-  
+    <div class="row" id="product-list">
+        @if (Model?.Products != null && Model.Products.Any())
+        {
+            @await Html.PartialAsync("_ProductGridItems", Model.Products)
+        }
+        else
+        {
+            <div class="col-12 text-center py-5">
+                <h4>No products found</h4>
+                <p class="text-muted">Try adjusting your search or filters</p>
+            </div>
+        }
+    </div>
+
     <div id="scroll-trigger" style="height: 1px;"></div>
 
-   
     <div id="loading-spinner" class="text-center my-3" style="display:none;">
         <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
@@ -22,16 +50,16 @@
 
 @section Scripts {
     <script>
-        let currentPage = @Model.PagingInfo.CurrentPage;
-        const pageSize = @Model.PagingInfo.ItemsPerPage;
-        let category = '@Model.CurrentCategory' || null;
+        let currentPage = @(Model?.PagingInfo?.CurrentPage ?? 1);
+        const pageSize = @(Model?.PagingInfo?.ItemsPerPage ?? 20);
+        let category = '@(Model?.CurrentCategory ?? "")' || null;
+        let searchTerm = '@(Model?.SearchTerm ?? "")' || null;  // ✅ Добавляем searchTerm
         let isLoading = false;
-        let hasMore = @(Model.PagingInfo.CurrentPage < Model.PagingInfo.TotalPages ? "true" : "false");
+        let hasMore = @(Model?.PagingInfo != null && Model.PagingInfo.CurrentPage < Model.PagingInfo.TotalPages ? "true" : "false");
         const trigger = document.getElementById('scroll-trigger');
         const productList = document.getElementById('product-list');
         const spinner = document.getElementById('loading-spinner');
 
-      
         const observer = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting && hasMore && !isLoading) {
                 loadMore();
@@ -40,7 +68,9 @@
             rootMargin: '0px 0px 100px 0px'
         });
 
-        observer.observe(trigger);
+        if (hasMore) {
+            observer.observe(trigger);
+        }
 
         function loadMore() {
             isLoading = true;
@@ -50,11 +80,13 @@
             if (category) {
                 url += `&category=${encodeURIComponent(category)}`;
             }
+            if (searchTerm) {
+                url += `&searchTerm=${encodeURIComponent(searchTerm)}`;
+            }
 
             fetch(url)
                 .then(response => response.text())
                 .then(html => {
-                  
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = html;
 
@@ -62,7 +94,6 @@
                     if (items.length) {
                         items.forEach(el => productList.appendChild(el));
                     } else {
-                       
                         hasMore = false;
                     }
                     if (items.length < pageSize) {

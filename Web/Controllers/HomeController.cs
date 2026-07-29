@@ -7,7 +7,7 @@ namespace Xenon.Web.Controllers
 {
     [Route("{category}/Page{productPage:int}")]
     [Route("Page{productPage:int}")]
-    [Route("Home/LoadMore")]
+    
     [Route("{category}")]
     [Route("")]
     public class HomeController : Controller
@@ -32,18 +32,14 @@ namespace Xenon.Web.Controllers
         private string CartId => _httpContextAccessor.HttpContext?.Session?.Id
             ?? Guid.NewGuid().ToString();
 
-        public async Task<IActionResult> Index(string category, int page = 1)
+        public async Task<IActionResult> Index(string category, string searchTerm, int page = 1)
         {
             const int pageSize = 20;
 
-            // Получаем товары с пагинацией
-            var products = await _productService.GetProductsAsync(page, pageSize, category);
-            var total = await _productService.GetTotalCountAsync(category);
-
-            // Получаем корзину для отображения количества
+            var products = await _productService.GetProductsAsync(page, pageSize, category, searchTerm);
+            var total = await _productService.GetTotalCountAsync(category, searchTerm);
             var cart = await _cartService.GetCartAsync(CartId);
 
-            // Преобразуем товары с указанием количества в корзине
             var productsWithQuantity = products
                 .Select(p => new ProductCartViewModel
                 {
@@ -63,30 +59,33 @@ namespace Xenon.Web.Controllers
                     ItemsPerPage = pageSize,
                     TotalItems = total
                 },
-                CurrentCategory = category
+                CurrentCategory = category,
+                SearchTerm = searchTerm
             };
 
             return View(viewModel);
         }
 
-        // Загрузка следующей порции товаров (для бесконечного скролла)
-        //public async Task<IActionResult> LoadMore(string category, int page)
-        //{
-        //    const int pageSize = 20;
-        //    var products = await _productService.GetProductsAsync(page, pageSize, category);
-        //    var cart = await _cartService.GetCartAsync(CartId);
+        [Route("Home/LoadMore")]
+        public async Task<IActionResult> LoadMore(string category, string searchTerm, int page)
+        {
+            const int pageSize = 20;
+            var products = await _productService.GetProductsAsync(page, pageSize, category, searchTerm);
+            var cart = await _cartService.GetCartAsync(CartId);
 
-        //    var productsWithQuantity = products
-        //        .Select(p => new ProductCartViewModel
-        //        {
-        //            Product = p,
-        //            QuantityInCart = cart.Lines
-        //                .FirstOrDefault(l => l.Product.ProductID == p.ProductID)
-        //                ?.Quantity ?? 0
-        //        })
-        //        .ToList();
+            var productsWithQuantity = products
+                .Select(p => new ProductCartViewModel
+                {
+                    Product = p,
+                    QuantityInCart = cart.Lines
+                        .FirstOrDefault(l => l.Product.ProductID == p.ProductID)
+                        ?.Quantity ?? 0
+                })
+                .ToList();
 
-        //    return PartialView("_ProductGridItems", productsWithQuantity);
-        //}
+            return PartialView("_ProductGridItems", productsWithQuantity);
+        }
+
+       
     }
 }

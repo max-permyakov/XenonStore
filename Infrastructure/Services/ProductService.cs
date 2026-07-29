@@ -1,6 +1,4 @@
-﻿// Xenon.Infrastructure/Services/ProductService.cs
-using Xenon.Domain.Interfaces;
-using Xenon.Domain.Models;
+﻿using Xenon.Domain.Models;
 
 public class ProductService : IProductService
 {
@@ -11,18 +9,18 @@ public class ProductService : IProductService
         _repository = repository;
     }
 
-    public async Task<IEnumerable<Product>> GetProductsAsync(int page, int pageSize, string? category = null)
+    public async Task<IEnumerable<Product>> GetProductsAsync(int page, int pageSize, string? category = null, string? searchTerm = null)
     {
-        return await _repository.GetProductsAsync(page, pageSize, category);
+        return await _repository.GetProductsAsync(page, pageSize, category, searchTerm);
+    }
+
+    public async Task<int> GetTotalCountAsync(string? category = null, string? searchTerm = null)
+    {
+        return await _repository.GetTotalCountAsync(category, searchTerm);
     }
 
     public async Task<Product?> GetProductAsync(long id)
     {
         return await _repository.GetProductAsync(id);
-    }
-
-    public async Task<int> GetTotalCountAsync(string? category = null)
-    {
-        return await _repository.GetTotalCountAsync(category);
     }
 }

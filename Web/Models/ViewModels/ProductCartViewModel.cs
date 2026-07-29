@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿
 using Xenon.Domain.Models;
 namespace Xenon.Web.Models.ViewModels
 {
@@ -16,6 +15,7 @@ namespace Xenon.Web.Models.ViewModels
             = Enumerable.Empty<ProductCartViewModel>();
         public PagingInfo PagingInfo { get; set; } = new();
         public string? CurrentCategory { get; set; }
+        public object? SearchTerm { get;  set; }
     }
     public class LoadMoreResult
     {
