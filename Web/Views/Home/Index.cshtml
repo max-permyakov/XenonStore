@@ -1,9 +1,13 @@
-﻿@model ProductsListWithCartViewModel
+﻿@using Microsoft.AspNetCore.Antiforgery
+@model ProductsListWithCartViewModel
 
 @{
     ViewBag.Title = "Xenon";
 }
-
+@inject IAntiforgery Antiforgery
+@{
+    var antiforgeryToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
 <div class="container my-4">
     <div class="row mb-4">
         <div class="col-md-6 mx-auto">
@@ -50,10 +54,11 @@
 
 @section Scripts {
     <script>
+        const token = '@antiforgeryToken';
         let currentPage = @(Model?.PagingInfo?.CurrentPage ?? 1);
         const pageSize = @(Model?.PagingInfo?.ItemsPerPage ?? 20);
         let category = '@(Model?.CurrentCategory ?? "")' || null;
-        let searchTerm = '@(Model?.SearchTerm ?? "")' || null;  // ✅ Добавляем searchTerm
+        let searchTerm = '@(Model?.SearchTerm ?? "")' || null; 
         let isLoading = false;
         let hasMore = @(Model?.PagingInfo != null && Model.PagingInfo.CurrentPage < Model.PagingInfo.TotalPages ? "true" : "false");
         const trigger = document.getElementById('scroll-trigger');
@@ -115,6 +120,77 @@
                     console.error('Error loading more products:', error);
                     isLoading = false;
                     spinner.style.display = 'none';
+                });
+        }
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-cart-action');
+            if (!btn) return;
+
+            e.preventDefault();
+            const productId = btn.dataset.productId;
+            const action = btn.dataset.action;
+            const url = `/Cart?handler=${action === 'add' ? 'AddOne' : 'RemoveOne'}`;
+
+            // Показываем индикатор загрузки (опционально)
+            btn.disabled = true;
+            btn.innerHTML = '...';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token,
+                    'X-CSRF-TOKEN': token,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams({
+                    productId: productId,
+                    returnUrl: window.location.pathname + window.location.search
+                })
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network error');
+                    return response.json(); // ожидаем JSON с новым количеством
+                })
+                .then(data => {
+                    // Обновляем количество в карточке
+                    const badge = document.querySelector(`.quantity-badge[data-product-id="${productId}"]`);
+                    if (badge) {
+                        if (data.quantity > 0) {
+                            badge.textContent = data.quantity;
+                        } else {
+                            // Если количество стало 0, перерисовываем кнопки
+                            // проще всего перезагрузить карточку или скрыть
+                            location.reload(); // временное решение, но лучше обновить DOM
+                        }
+                    } else {
+                        // Если кнопки не было (была только Add), обновляем весь блок
+                        // Можно перезагрузить карточку через PartialView
+                        refreshProductCard(productId);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to update cart');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = btn.dataset.action === 'add' ? '+' : '−';
+                });
+        });
+
+        // Функция для обновления карточки через PartialView
+        function refreshProductCard(productId) {
+            fetch(`/Home/ProductCard?productId=${productId}`)
+                .then(response => response.text())
+                .then(html => {
+                    const container = document.querySelector(`[data-product-id="${productId}"]`)?.closest('.col-lg-3');
+                    if (container) {
+                        const temp = document.createElement('div');
+                        temp.innerHTML = html;
+                        const newCard = temp.querySelector('.col-lg-3');
+                        container.replaceWith(newCard);
+                    }
                 });
         }
     </script>

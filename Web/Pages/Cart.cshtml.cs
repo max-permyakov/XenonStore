@@ -60,49 +60,36 @@ namespace Xenon.Web.Pages
         // Добавление одного товара (из списка товаров)
         public async Task<IActionResult> OnPostAddOneAsync(long productId, string returnUrl)
         {
-            try
+            await _cartService.AddItemAsync(CartId, productId, 1);
+            var cart = await _cartService.GetCartAsync(CartId);
+            int quantity = cart.Lines
+                .FirstOrDefault(l => l.Product.ProductID == productId)?.Quantity ?? 0;
+
+            // Если запрос AJAX, возвращаем JSON
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
-                await _cartService.AddItemAsync(CartId, productId, 1);
-                _logger.LogInformation("Product {ProductId} added to cart (AddOne)", productId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to add product {ProductId} to cart", productId);
+                return new JsonResult(new { quantity });
             }
 
             return LocalRedirect(returnUrl);
         }
 
-        // Удаление одного товара
         public async Task<IActionResult> OnPostRemoveOneAsync(long productId, string returnUrl)
         {
-            try
-            {
-                var cart = await _cartService.GetCartAsync(CartId);
-                var line = cart.Lines.FirstOrDefault(l => l.Product.ProductID == productId);
+            await _cartService.DeacreaseItemAsync(CartId, productId);
+            var cart = await _cartService.GetCartAsync(CartId);
+            int quantity = cart.Lines
+                .FirstOrDefault(l => l.Product.ProductID == productId)?.Quantity ?? 0;
 
-                if (line != null)
-                {
-                    if (line.Quantity > 1)
-                    {
-                        await _cartService.UpdateQuantityAsync(CartId, productId, line.Quantity - 1);
-                    }
-                    else
-                    {
-                        await _cartService.RemoveItemAsync(CartId, productId);
-                    }
-                    _logger.LogInformation("Removed one unit of product {ProductId}", productId);
-                }
-            }
-            catch (Exception ex)
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
-                _logger.LogError(ex, "Failed to remove product {ProductId}", productId);
+                return new JsonResult(new { quantity });
             }
 
             return LocalRedirect(returnUrl);
         }
 
-        // Полное удаление товара из корзины
+
         public async Task<IActionResult> OnPostRemove(long productId, string returnUrl)
         {
             try

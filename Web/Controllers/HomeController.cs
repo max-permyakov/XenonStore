@@ -86,6 +86,27 @@ namespace Xenon.Web.Controllers
             return PartialView("_ProductGridItems", productsWithQuantity);
         }
 
+        [Route("Home/ProductCard")]
+        public async Task<IActionResult> ProductCard(long productId)
+        {
+            var product = await _productService.GetProductAsync(productId);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            var cart = await _cartService.GetCartAsync(CartId);
+            var item = new ProductCartViewModel
+            {
+                Product = product,
+                QuantityInCart = cart.Lines
+                    .FirstOrDefault(l => l.Product.ProductID == product.ProductID)
+                    ?.Quantity ?? 0
+            };
+
+            return PartialView("_ProductGridItems", new[] { item });
+        }
+
        
     }
 }

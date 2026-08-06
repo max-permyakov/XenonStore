@@ -1,15 +1,16 @@
-﻿using Bogus;
+﻿// Не используется
+
+
+using Bogus;
 using Xenon.Domain.Models;
 
 namespace Xenon.Infrastructure.Services
 {
     public static class DataGenerator
     {
-        // Генерация списка продуктов
+      
         public static List<Product> GenerateProducts(int count = 100)
         {
-            // Список реальных категорий, чтобы они были осмысленными
-
 
             var productFaker = new Faker<Product>()
                 .RuleFor(p => p.Name, f => f.Commerce.ProductName())
@@ -19,8 +20,6 @@ namespace Xenon.Infrastructure.Services
 
             return productFaker.Generate(count);
         }
-
-        // Генерация заказов с позициями
         public static List<Order> GenerateOrders(IEnumerable<Product> products, int orderCount = 20)
         {
             var productList = products.ToList();
@@ -36,7 +35,7 @@ namespace Xenon.Infrastructure.Services
                 .RuleFor(o => o.Shipped, f => f.Random.Bool(0.7f))
                 .RuleFor(o => o.Lines, (f, o) =>
                 {
-                    // Генерируем от 1 до 5 позиций в заказе
+                
                     int linesCount = f.Random.Int(1, 5);
                     var lines = new List<CartLine>();
                     for (int i = 0; i < linesCount; i++)
@@ -89,7 +88,7 @@ namespace Xenon.Infrastructure.Services
         "Корм для собак", "Корм для кошек", "Аксессуары для животных",
         // Канцтовары
         "Бумага", "Ручки", "Карандаши", "Папки", "Ежедневники"
-        // ... можно добавить ещё 100+ категорий
+        
     };
         }
     }

@@ -21,6 +21,7 @@ namespace Xenon.Web.Controllers
         [HttpGet]
         public ViewResult Checkout() => View(new Order());
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Checkout(Order order)
         {
             if (cart.Lines.Count() == 0)

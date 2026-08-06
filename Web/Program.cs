@@ -30,6 +30,7 @@ try
   
     builder.Services.Configure<SessionOptions>(options =>
     {
+        options.Cookie.Name = ".XenenStore.Session";
         options.Cookie.IsEssential = true;
     });
     builder.Services.AddDbContext<StoreDbContext>(opts =>
@@ -46,7 +47,9 @@ try
         opts.SchemaName = "dbo";
         opts.TableName = "DataCache";
     });
-  
+    builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(@"C:\Users\maksi\Documents\ScriptsOrUtilites\ProjectsC#\XenonStore\Web\App_Data\keys\")) 
+    .SetApplicationName("XenonStore");
     builder.Services.AddDbContext<AppIdentityDbContext>(options =>
         options.UseSqlServer(
             builder.Configuration["ConnectionStrings:IdentityConnection"]));
@@ -72,7 +75,14 @@ try
     builder.Services.AddScoped<IOrderRepository, EFOrderRepository>();
     builder.Services.AddScoped<ProductImportService>();
     builder.Services.AddServerSideBlazor();
-
+    builder.Services.AddAntiforgery(options =>
+    {
+        options.Cookie.Name = "XSRF-TOKEN";
+        options.FormFieldName = "__RequestVerificationToken";
+        options.HeaderName = "X-CSRF-TOKEN";
+        options.Cookie.MaxAge = TimeSpan.FromMinutes(20);
+        options.Cookie.IsEssential = true;
+    });
     var app = builder.Build();
 
     if (app.Environment.IsProduction())

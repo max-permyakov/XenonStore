@@ -102,6 +102,9 @@ namespace Xenon.Infrastructure.Services
         {
             var cart = await _cartStorage.GetAsync(cartId);
             cart.DecreaseItem(productId);
+            await _cartStorage.SaveAsync(cartId, cart);
+            _logger.LogDebug("Decreased product {ProductId} in cart {CartId}",
+                productId, cartId);
         }
     }
 }

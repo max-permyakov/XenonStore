@@ -1,5 +1,4 @@
-﻿// Xenon.Infrastructure/Services/ProductImportService.cs
-using CsvHelper;
+﻿using CsvHelper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -41,24 +40,20 @@ public class ProductImportService
 
         foreach (var record in records)
         {
-            // 1. Парсим цену (убираем валюту)
             var price = ParsePrice(record.PriceString);
 
-            // 2. Парсим рейтинг (извлекаем число)
             var rating = ParseRating(record.RatingString);
 
-            // 3. Скидку сохраняем как текст (если нужно)
             var discountText = record.DiscountString;
 
-            // 4. Валюта — берем из цены или из поля Currency
             var currency = string.IsNullOrWhiteSpace(record.CurrencyString)
                 ? "USD"
                 : record.CurrencyString;
 
-            // 5. Получаем категорию
+            
             var category = await GetOrCreateCategory(record.SubCategory, categories);
 
-            // 6. Проверяем дубликаты
+         
             var existing = await _context.Products
                 .FirstOrDefaultAsync(p => p.Name == record.Title);
 
@@ -68,7 +63,6 @@ public class ProductImportService
                 continue;
             }
             var defaultSupplier = await GetOrCreateDefaultSupplier();
-            // 7. Создаем товар
             var product = new Product
             {
                 Name = record.Title,
@@ -97,12 +91,8 @@ public class ProductImportService
         if (string.IsNullOrWhiteSpace(priceString))
             return 0;
 
-        // Убираем все символы, кроме цифр, точки и запятой
         var cleaned = Regex.Replace(priceString, @"[^\d.,]", "");
-        // Если есть запятая как разделитель тысяч, заменяем на пустую
         cleaned = cleaned.Replace(",", "");
-        // Если есть точка как разделитель тысяч, заменяем на пустую (зависит от локали)
-        // В нашем случае цена $169.99 — точка разделитель десятичных
         if (decimal.TryParse(cleaned, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
             return result;
 
@@ -114,7 +104,6 @@ public class ProductImportService
         if (string.IsNullOrWhiteSpace(ratingString))
             return null;
 
-        // Ищем число с точкой или запятой (например, 4.4)
         var match = Regex.Match(ratingString, @"(\d+\.?\d*)");
         if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
             return result;
@@ -137,7 +126,7 @@ public class ProductImportService
         {
             category = new Category { Name = categoryName };
             _context.Categories.Add(category);
-            await _context.SaveChangesAsync(); // чтобы получить Id
+            await _context.SaveChangesAsync(); 
         }
 
         cache[categoryName] = category;
@@ -177,7 +166,7 @@ public class ProductImportService
             }
         }
 
-        // Получаем все файлы изображений в папке (поддерживаемые расширения)
+      
         var imageFiles = Directory.GetFiles(categoryFolder)
             .Where(f => new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }
                 .Contains(Path.GetExtension(f).ToLower()))
@@ -185,24 +174,22 @@ public class ProductImportService
 
         if (!imageFiles.Any())
         {
-            // Если в папке нет изображений — возвращаем заглушку
+           
             return "/images/placeholder.jpg";
         }
 
-        // Получаем или создаем счетчик для этой категории
+  
         if (!_imageIndexPerCategory.ContainsKey(normalizedCategory))
         {
             _imageIndexPerCategory[normalizedCategory] = 0;
         }
 
-        // Выбираем файл по циклическому индексу
+       
         var index = _imageIndexPerCategory[normalizedCategory] % imageFiles.Count;
         var selectedFile = imageFiles[index];
 
-        // Увеличиваем счетчик для следующего товара в этой категории
+      
         _imageIndexPerCategory[normalizedCategory]++;
-
-        // Возвращаем относительный URL для браузера
         var relativePath = Path.GetRelativePath(_webHostEnvironment.WebRootPath, selectedFile);
         return "/" + relativePath.Replace('\\', '/');
     }

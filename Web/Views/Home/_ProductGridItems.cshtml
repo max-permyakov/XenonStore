@@ -15,46 +15,42 @@
                     @item.Product.Price.ToString("c")
                 </p>
 
-                <div class="mt-auto d-flex flex-column align-items-center">
-                 
-                    <div class="quantity-control d-flex align-items-center mb-2">
-                        @if (item.QuantityInCart > 0)
-                        {
-                            <form method="post" asp-page="/Cart" asp-page-handler="RemoveOne" class="d-inline">
-                                <input type="hidden" name="productId" value="@item.Product.ProductID" />
-                                <input type="hidden" name="returnUrl" value="@Context.Request.PathAndQuery()" />
-                                <button type="submit" class="btn btn-outline-secondary btn-sm">−</button>
-                            </form>
-                            <span class="mx-2 badge badge-pill badge-primary text-dark" style="min-width:2rem;">
-                                @item.QuantityInCart
-                            </span>
-
-                            <form method="post" asp-page="/Cart" asp-page-handler="AddOne" class="d-inline">
-                                <input type="hidden" name="productId" value="@item.Product.ProductID" />
-                                <input type="hidden" name="returnUrl" value="@Context.Request.PathAndQuery()" />
-                                <button type="submit" class="btn btn-outline-success btn-sm">+</button>
-                            </form>
-                        }
-                        else
-                        {
-                            <form method="post" asp-page="/Cart" asp-page-handler="AddOne" class="d-inline">
-                                <input type="hidden" name="productId" value="@item.Product.ProductID" />
-                                <input type="hidden" name="returnUrl" value="@Context.Request.PathAndQuery()" />
-                                <button type="submit" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-cart-plus"></i> Add
-                                </button>
-                            </form>
-                        }
-                    </div>
-
+                <div class="quantity-control d-flex align-items-center mb-2">
                     @if (item.QuantityInCart > 0)
                     {
-                        <a class="btn btn-sm bg-gradient d-inline" asp-page="/Cart"
-                        asp-route-returnurl="@ViewContext.HttpContext.Request.PathAndQuery()">
-                            <i class="fa fa-shopping-cart"></i> В корзину
-                        </a>                
+                        <button class="btn btn-outline-secondary btn-sm btn-cart-action"
+                                data-product-id="@item.Product.ProductID"
+                                data-action="remove">
+                            −
+                        </button>
+                        <span class="mx-2 badge badge-pill badge-primary text-dark quantity-badge"
+                              data-product-id="@item.Product.ProductID"
+                              style="min-width:2rem;">
+                            @item.QuantityInCart
+                        </span>
+                        <button class="btn btn-outline-success btn-sm btn-cart-action"
+                                data-product-id="@item.Product.ProductID"
+                                data-action="add">
+                            +
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-primary btn-sm btn-cart-action"
+                                data-product-id="@item.Product.ProductID"
+                                data-action="add">
+                            <i class="fas fa-cart-plus"></i> Add
+                        </button>
                     }
                 </div>
+
+                @if (item.QuantityInCart > 0)
+                {
+                    <a class="btn btn-sm bg-gradient d-inline" asp-page="/Cart"
+                       asp-route-returnurl="@ViewContext.HttpContext.Request.PathAndQuery()">
+                        <i class="fa fa-shopping-cart"></i> В корзину
+                    </a>
+                }
             </div>
         </div>
     </div>

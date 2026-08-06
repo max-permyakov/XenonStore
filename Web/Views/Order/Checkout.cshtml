@@ -5,6 +5,7 @@
 
 
 <form asp-action="Checkout" method="post">
+    @Html.AntiForgeryToken()
     <h3>Ship to</h3>
     <div class="form-group">
         <label>Name:</label><input asp-for="Name" class="form-control" />
