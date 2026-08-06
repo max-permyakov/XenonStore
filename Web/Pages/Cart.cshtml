@@ -1,5 +1,5 @@
 ﻿@page
-@using SportsStore.Pages
+@using Xenon.Infrastructure.Services
 @model CartModel
 <h2>Your cart</h2>
 <table class="table table-bordered table-striped">
@@ -19,13 +19,13 @@
                     <div class="btn-group" role="group">
                         <form method="post" asp-page-handler="RemoveOne" class="d-inline">
                             <input type="hidden" name="productId" value="@line.Product.ProductID" />
-                            <input type="hidden" name="returnUrl" value="@Request.Path" />
+                            <input type="hidden" name="returnUrl" value="@Request.PathAndQuery()" />
                             <button type="submit" class="btn btn-sm btn-outline-secondary">−</button>
                         </form>
                         <span class="mx-2 align-middle">@line.Quantity</span>
                         <form method="post" asp-page-handler="AddOne" class="d-inline">
                             <input type="hidden" name="productId" value="@line.Product.ProductID" />
-                            <input type="hidden" name="returnUrl" value="@Request.Path" />
+                            <input type="hidden" name="returnUrl" value="@Request.PathAndQuery()" />
                             <button type="submit" class="btn btn-sm btn-outline-success">+</button>
                         </form>
                     </div>
@@ -47,8 +47,13 @@
         </tr>
     </tfoot>
 </table>
+@{
+    var continueUrl = !string.IsNullOrEmpty(Model?.ReturnUrl) && Url.IsLocalUrl(Model.ReturnUrl)
+        ? Model.ReturnUrl
+        : Url.Action("Index", "Home");
+}
 <div class="text-center">
-    <a class="btn btn-primary" asp-action="Index" asp-controller="Home">Continue shopping</a>
+    <a class="btn btn-primary" href="@continueUrl">Continue shopping</a>
     <a class="btn btn-primary" asp-action="Checkout" asp-controller="Order">
         Checkout
     </a>

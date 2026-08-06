@@ -87,7 +87,7 @@ namespace Xenon.Web.Controllers
         }
 
         [Route("Home/ProductCard")]
-        public async Task<IActionResult> ProductCard(long productId)
+        public async Task<IActionResult> ProductCard(long productId, string returnUrl)
         {
             var product = await _productService.GetProductAsync(productId);
             if (product == null)
@@ -104,6 +104,7 @@ namespace Xenon.Web.Controllers
                     ?.Quantity ?? 0
             };
 
+            ViewData["CartReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
             return PartialView("_ProductGridItems", new[] { item });
         }
 

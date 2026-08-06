@@ -181,7 +181,8 @@
 
         // Функция для обновления карточки через PartialView
         function refreshProductCard(productId) {
-            fetch(`/Home/ProductCard?productId=${productId}`)
+            const returnUrl = window.location.pathname + window.location.search;
+            fetch(`/Home/ProductCard?productId=${productId}&returnUrl=${encodeURIComponent(returnUrl)}`)
                 .then(response => response.text())
                 .then(html => {
                     const container = document.querySelector(`[data-product-id="${productId}"]`)?.closest('.col-lg-3');

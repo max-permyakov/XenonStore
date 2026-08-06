@@ -1,8 +1,13 @@
 ﻿@model IEnumerable<ProductCartViewModel>
 
+@{
+    var cartReturnUrl = ViewData["CartReturnUrl"] as string
+        ?? ViewContext.HttpContext.Request.PathAndQuery();
+}
+
 @foreach (var item in Model)
 {
-    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+    <div class="col-lg-3 col-md-4 col-sm-6 mb-4" id="card-@item.Product.ProductID">
         <div class="card h-100 shadow-sm">
              <img src="@(string.IsNullOrEmpty(item.Product.ImageUrl) ? "/images/placeholder.jpg" : item.Product.ImageUrl)"
          class="card-img-top"
@@ -47,7 +52,7 @@
                 @if (item.QuantityInCart > 0)
                 {
                     <a class="btn btn-sm bg-gradient d-inline" asp-page="/Cart"
-                       asp-route-returnurl="@ViewContext.HttpContext.Request.PathAndQuery()">
+                       asp-route-returnurl="@($"{cartReturnUrl}#card-{item.Product.ProductID}")">
                         <i class="fa fa-shopping-cart"></i> В корзину
                     </a>
                 }
