@@ -9,14 +9,14 @@ public class ProductService : IProductService
         _repository = repository;
     }
 
-    public async Task<IEnumerable<Product>> GetProductsAsync(int page, int pageSize, string? category = null, string? searchTerm = null)
+    public async Task<IEnumerable<Product>> GetProductsAsync(int page, int pageSize, ProductFilter? filter = null)
     {
-        return await _repository.GetProductsAsync(page, pageSize, category, searchTerm);
+        return await _repository.GetProductsAsync(page, pageSize, filter);
     }
 
-    public async Task<int> GetTotalCountAsync(string? category = null, string? searchTerm = null)
+    public async Task<int> GetTotalCountAsync(ProductFilter? filter = null)
     {
-        return await _repository.GetTotalCountAsync(category, searchTerm);
+        return await _repository.GetTotalCountAsync(filter);
     }
 
     public async Task<Product?> GetProductAsync(long id)

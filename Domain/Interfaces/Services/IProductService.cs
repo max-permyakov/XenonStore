@@ -3,7 +3,7 @@ using Xenon.Domain.Models;
 
 public interface IProductService
 {
-    Task<IEnumerable<Product>> GetProductsAsync(int page, int pageSize, string? category = null, string? searchTerm = null);
+    Task<IEnumerable<Product>> GetProductsAsync(int page, int pageSize, ProductFilter? filter = null);
     Task<Product?> GetProductAsync(long id);
-    Task<int> GetTotalCountAsync(string? category = null, string? searchTerm = null);
+    Task<int> GetTotalCountAsync(ProductFilter? filter = null);
 }

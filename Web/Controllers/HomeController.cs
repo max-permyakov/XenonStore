@@ -36,8 +36,12 @@ namespace Xenon.Web.Controllers
         {
             const int pageSize = 20;
 
-            var products = await _productService.GetProductsAsync(page, pageSize, category, searchTerm);
-            var total = await _productService.GetTotalCountAsync(category, searchTerm);
+            var filter = BuildFilter();
+            filter.Category = category;
+            filter.SearchTerm = searchTerm;
+
+            var products = await _productService.GetProductsAsync(page, pageSize, filter);
+            var total = await _productService.GetTotalCountAsync(filter);
             var cart = await _cartService.GetCartAsync(CartId);
 
             var productsWithQuantity = products
@@ -70,7 +74,12 @@ namespace Xenon.Web.Controllers
         public async Task<IActionResult> LoadMore(string category, string searchTerm, int page)
         {
             const int pageSize = 20;
-            var products = await _productService.GetProductsAsync(page, pageSize, category, searchTerm);
+
+            var filter = BuildFilter();
+            filter.Category = category;
+            filter.SearchTerm = searchTerm;
+
+            var products = await _productService.GetProductsAsync(page, pageSize, filter);
             var cart = await _cartService.GetCartAsync(CartId);
 
             var productsWithQuantity = products
@@ -108,6 +117,62 @@ namespace Xenon.Web.Controllers
             return PartialView("_ProductGridItems", new[] { item });
         }
 
-       
+        private ProductFilter BuildFilter()
+        {
+            var request = Request.Query;
+
+            var filter = new ProductFilter
+            {
+                MinPrice = ParseDecimal(request["minPrice"]),
+                MaxPrice = ParseDecimal(request["maxPrice"]),
+                MinRating = ParseDouble(request["minRating"]),
+                Supplier = !string.IsNullOrWhiteSpace(request["supplier"]) ? request["supplier"].ToString() : null
+            };
+
+            var sort = request["sort"].ToString();
+            var direction = string.Equals(request["dir"].ToString(), "asc", StringComparison.OrdinalIgnoreCase)
+                ? SortDirection.Ascending
+                : SortDirection.Descending;
+
+            switch (sort)
+            {
+                case "price-asc":
+                    filter.SortBy = ProductSortBy.Price;
+                    filter.Direction = SortDirection.Ascending;
+                    break;
+                case "price-desc":
+                    filter.SortBy = ProductSortBy.Price;
+                    filter.Direction = SortDirection.Descending;
+                    break;
+                case "rating-asc":
+                    filter.SortBy = ProductSortBy.Rating;
+                    filter.Direction = SortDirection.Ascending;
+                    break;
+                case "rating-desc":
+                    filter.SortBy = ProductSortBy.Rating;
+                    filter.Direction = SortDirection.Descending;
+                    break;
+                case "popularity-asc":
+                    filter.SortBy = ProductSortBy.Popularity;
+                    filter.Direction = SortDirection.Ascending;
+                    break;
+                default:
+                    filter.SortBy = ProductSortBy.Popularity;
+                    filter.Direction = SortDirection.Descending;
+                    break;
+            }
+
+            return filter;
+        }
+
+        private static decimal? ParseDecimal(string? value)
+        {
+            return decimal.TryParse(value, out var parsed) ? parsed : null;
+        }
+
+        private static double? ParseDouble(string? value)
+        {
+            return double.TryParse(value, out var parsed) ? parsed : null;
+        }
     }
 }

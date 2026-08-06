@@ -26,6 +26,7 @@ namespace Xenon.Domain.Models
         public string? Currency { get; set; }   // Валюта (USD, EUR и т.д.)
         public string? Features { get; set; }   // Особенности (может быть длинный текст)
         public string? ImageUrl { get; set; }   // Ссылка на изображение (добавим позже)
+        public int Popularity { get; set; }     // Популярность (счётчик продаж/просмотров)
         // Навигационные свойства
         public Category? Category { get; set; }
         public Supplier? Supplier { get; set; }

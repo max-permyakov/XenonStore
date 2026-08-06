@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Xenon.Infrastructure.Data;
 
@@ -10,9 +11,11 @@ using Xenon.Infrastructure.Data;
 namespace Xenon.Infrastructure.Migrations
 {
     [DbContext(typeof(StoreDbContext))]
-    partial class StoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260806162410_AddPopularityToProduct")]
+    partial class AddPopularityToProduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,7 +47,7 @@ namespace Xenon.Infrastructure.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("CartLine", (string)null);
+                    b.ToTable("CartLine");
                 });
 
             modelBuilder.Entity("Xenon.Domain.Models.Category", b =>
@@ -65,7 +68,7 @@ namespace Xenon.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("Xenon.Domain.Models.Order", b =>
@@ -125,7 +128,7 @@ namespace Xenon.Infrastructure.Migrations
 
                     b.HasIndex("Shipped");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Xenon.Domain.Models.Product", b =>
@@ -181,7 +184,7 @@ namespace Xenon.Infrastructure.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("Xenon.Domain.Models.Supplier", b =>
@@ -206,7 +209,7 @@ namespace Xenon.Infrastructure.Migrations
 
                     b.HasIndex("Name");
 
-                    b.ToTable("Suppliers", (string)null);
+                    b.ToTable("Suppliers");
                 });
 
             modelBuilder.Entity("Xenon.Domain.Models.CartLine", b =>

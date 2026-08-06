@@ -25,41 +25,47 @@ namespace Xenon.Infrastructure.Repositories
 
         public Task<Product?> GetProductAsync(long id)
         {
-            return context.Products.FirstOrDefaultAsync(x=>x.ProductID == id);
+            return context.Products.FirstOrDefaultAsync(x => x.ProductID == id);
         }
 
-        public async Task<IEnumerable<Product>> GetProductsAsync(int page, int pageSize, string? category = null)
+        public async Task<IEnumerable<Product>> GetProductsAsync(int page, int pageSize, ProductFilter? filter = null)
         {
-            var query = context.Products.AsQueryable();
+            var query = BuildFilteredQuery(filter);
 
-            if (!string.IsNullOrEmpty(category))
-            {
-               
-                query = query.Where(p => p.Category != null && p.Category.Name == category);
-            }
+            query = ApplySorting(query, filter);
 
             return await query
-                .OrderBy(p => p.ProductID)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Product>> GetProductsAsync(int page, int pageSize, string? category = null, string? searchTerm = null)
+        public async Task<int> GetTotalCountAsync(ProductFilter? filter = null)
+        {
+            var query = BuildFilteredQuery(filter);
+            return await query.CountAsync();
+        }
+
+        private IQueryable<Product> BuildFilteredQuery(ProductFilter? filter)
         {
             var query = context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Supplier)
                 .AsQueryable();
 
-            if (!string.IsNullOrEmpty(category))
+            if (filter == null)
             {
-                query = query.Where(p => p.Category != null && p.Category.Name == category);
+                return query;
             }
 
-            if (!string.IsNullOrEmpty(searchTerm))
+            if (!string.IsNullOrEmpty(filter.Category))
             {
-                var normalizedSearch = searchTerm.ToLower().Trim();
+                query = query.Where(p => p.Category != null && p.Category.Name == filter.Category);
+            }
+
+            if (!string.IsNullOrEmpty(filter.SearchTerm))
+            {
+                var normalizedSearch = filter.SearchTerm.ToLower().Trim();
                 query = query.Where(p =>
                     p.Name.ToLower().Contains(normalizedSearch) ||
                     (p.Description != null && p.Description.ToLower().Contains(normalizedSearch)) ||
@@ -67,45 +73,46 @@ namespace Xenon.Infrastructure.Repositories
                 );
             }
 
-            return await query
-                .OrderBy(p => p.ProductID)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            if (filter.MinPrice.HasValue)
+            {
+                query = query.Where(p => p.Price >= filter.MinPrice.Value);
+            }
+
+            if (filter.MaxPrice.HasValue)
+            {
+                query = query.Where(p => p.Price <= filter.MaxPrice.Value);
+            }
+
+            if (filter.MinRating.HasValue)
+            {
+                query = query.Where(p => p.Rating != null && p.Rating >= filter.MinRating.Value);
+            }
+
+            if (!string.IsNullOrEmpty(filter.Supplier))
+            {
+                query = query.Where(p => p.Supplier != null && p.Supplier.Name == filter.Supplier);
+            }
+
+            return query;
         }
 
-        public async Task<int> GetTotalCountAsync(string? category = null)
+        private IQueryable<Product> ApplySorting(IQueryable<Product> query, ProductFilter? filter)
         {
-            var query = context.Products.AsQueryable();
+            var direction = filter?.Direction ?? SortDirection.Descending;
+            var sortBy = filter?.SortBy ?? ProductSortBy.Popularity;
 
-            if (!string.IsNullOrEmpty(category))
+            return sortBy switch
             {
-                query = query.Where(p => p.Category != null && p.Category.Name == category);
-            }
-
-            return await query.CountAsync();
-        }
-
-        public async Task<int> GetTotalCountAsync(string? category = null, string? searchTerm = null)
-        {
-            var query = context.Products.AsQueryable();
-
-            if (!string.IsNullOrEmpty(category))
-            {
-                query = query.Where(p => p.Category != null && p.Category.Name == category);
-            }
-
-            if (!string.IsNullOrEmpty(searchTerm))
-            {
-                var normalizedSearch = searchTerm.ToLower().Trim();
-                query = query.Where(p =>
-                    p.Name.ToLower().Contains(normalizedSearch) ||
-                    (p.Description != null && p.Description.ToLower().Contains(normalizedSearch)) ||
-                    (p.Features != null && p.Features.ToLower().Contains(normalizedSearch))
-                );
-            }
-
-            return await query.CountAsync();
+                ProductSortBy.Price => direction == SortDirection.Ascending
+                    ? query.OrderBy(p => p.Price).ThenBy(p => p.ProductID)
+                    : query.OrderByDescending(p => p.Price).ThenBy(p => p.ProductID),
+                ProductSortBy.Rating => direction == SortDirection.Ascending
+                    ? query.OrderBy(p => p.Rating ?? 0).ThenBy(p => p.ProductID)
+                    : query.OrderByDescending(p => p.Rating ?? 0).ThenBy(p => p.ProductID),
+                _ => direction == SortDirection.Ascending
+                    ? query.OrderBy(p => p.Popularity).ThenBy(p => p.ProductID)
+                    : query.OrderByDescending(p => p.Popularity).ThenBy(p => p.ProductID)
+            };
         }
 
         public void SaveProduct(Product p)
