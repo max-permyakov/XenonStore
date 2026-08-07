@@ -53,3 +53,28 @@ body {
   overflow: hidden;
   margin-bottom: 0.5rem;
 }
+
+.btn-fav-toggle {
+  background: transparent;
+  border: 1px solid #dee2e6;
+  color: #adb5bd;
+  line-height: 1;
+  transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+.btn-fav-toggle:hover,
+.btn-fav-toggle:focus {
+  color: #e0245e;
+  border-color: #e0245e;
+}
+
+.btn-fav-toggle.favorited {
+  color: #e0245e;
+  border-color: #e0245e;
+  background-color: #fde8ec;
+}
+
+.favorites-badge {
+  font-size: 0.6rem;
+  padding: 0.2em 0.45em;
+}

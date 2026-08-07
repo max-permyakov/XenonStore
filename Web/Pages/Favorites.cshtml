@@ -1,0 +1,25 @@
+@page
+@model FavoritesModel
+<div class=" text-white">
+    @await Component.InvokeAsync("NavigationMenu")
+
+</div>
+<div class="container my-4">
+
+    <h2>Faforites</h2>
+    <div class="row" id="product-list" data-favorites-page="true">
+        @if (Model.Items.Any())
+        {
+            @await Html.PartialAsync("_ProductGridItems", Model.Items)
+        }
+        else
+        {
+            <div class="col-12 text-center py-5" id="favorites-empty">
+                <h4>В избранном пусто</h4>
+                <p class="text-muted">Нажмите на сердечко на карточке товара, чтобы добавить его в избранное</p>
+            </div>
+        }
+    </div>
+</div>
+
+@await Html.PartialAsync("_FavoritesScripts")

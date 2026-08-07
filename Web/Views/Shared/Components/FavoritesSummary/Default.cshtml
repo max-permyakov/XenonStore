@@ -1,0 +1,10 @@
+
+@model int
+<a class="btn btn-sm btn-secondary navbar-btn position-relative me-1" asp-page="/Favorites"
+   asp-route-returnurl="@ViewContext.HttpContext.Request.PathAndQuery()"
+   title="Избранное">
+    <i class="fas fa-heart"></i>
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger favorites-badge favorites-count-badge @(Model > 0 ? "" : "d-none")">
+        @Model
+    </span>
+</a>

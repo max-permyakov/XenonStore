@@ -19,7 +19,14 @@
                 <h5 class="card-title product-card-title">@item.Product.Name</h5>
                 <p class="card-text text-muted small product-card-description">@item.Product.Description</p>
 
-                <div class="mt-auto quantity-control d-flex align-items-center mb-2 justify-content-center pt-2">
+                <div class="mt-auto quantity-control d-flex align-items-center mb-2 justify-content-center pt-2 gap-2">
+                    <button type="button"
+                            class="btn btn-sm btn-fav-toggle @(item.IsFavorite ? "favorited" : "")"
+                            data-product-id="@item.Product.ProductID"
+                            title="@(item.IsFavorite ? "Убрать из избранного" : "В избранное")">
+                        <i class="fas fa-heart"></i>
+                    </button>
+
                     @if (item.QuantityInCart > 0)
                     {
                         <button class="btn btn-outline-secondary btn-sm btn-cart-action"

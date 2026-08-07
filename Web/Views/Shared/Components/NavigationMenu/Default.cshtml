@@ -33,7 +33,10 @@
                                 
                 </div>
             </div>
-            <div class="col-md-2 col-sm-1">@await Component.InvokeAsync("CartSummary")</div>
+            <div class="col-md-2 col-sm-1 d-flex align-items-center gap-1">
+                @await Component.InvokeAsync("FavoritesSummary")
+                @await Component.InvokeAsync("CartSummary")
+            </div>
         </nav>
 
     </div>

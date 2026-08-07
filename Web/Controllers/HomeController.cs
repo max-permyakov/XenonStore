@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Xenon.Domain.Interfaces.Services;
 using Xenon.Domain.Models;
+using Xenon.Web.Models;
 using Xenon.Web.Models.ViewModels;
 
 namespace Xenon.Web.Controllers
@@ -14,17 +15,20 @@ namespace Xenon.Web.Controllers
     {
         private readonly IProductService _productService;
         private readonly ICartService _cartService;
+        private readonly IFavoriteService _favoriteService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(
             IProductService productService,
             ICartService cartService,
+            IFavoriteService favoriteService,
             IHttpContextAccessor httpContextAccessor,
             ILogger<HomeController> logger)
         {
             _productService = productService;
             _cartService = cartService;
+            _favoriteService = favoriteService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
         }
@@ -42,17 +46,8 @@ namespace Xenon.Web.Controllers
 
             var products = await _productService.GetProductsAsync(page, pageSize, filter);
             var total = await _productService.GetTotalCountAsync(filter);
-            var cart = await _cartService.GetCartAsync(CartId);
 
-            var productsWithQuantity = products
-                .Select(p => new ProductCartViewModel
-                {
-                    Product = p,
-                    QuantityInCart = cart.Lines
-                        .FirstOrDefault(l => l.Product.ProductID == p.ProductID)
-                        ?.Quantity ?? 0
-                })
-                .ToList();
+            var productsWithQuantity = await BuildProductViewModelsAsync(products);
 
             var viewModel = new ProductsListWithCartViewModel
             {
@@ -80,17 +75,8 @@ namespace Xenon.Web.Controllers
             filter.SearchTerm = searchTerm;
 
             var products = await _productService.GetProductsAsync(page, pageSize, filter);
-            var cart = await _cartService.GetCartAsync(CartId);
 
-            var productsWithQuantity = products
-                .Select(p => new ProductCartViewModel
-                {
-                    Product = p,
-                    QuantityInCart = cart.Lines
-                        .FirstOrDefault(l => l.Product.ProductID == p.ProductID)
-                        ?.Quantity ?? 0
-                })
-                .ToList();
+            var productsWithQuantity = await BuildProductViewModelsAsync(products);
 
             return PartialView("_ProductGridItems", productsWithQuantity);
         }
@@ -104,17 +90,30 @@ namespace Xenon.Web.Controllers
                 return NotFound();
             }
 
-            var cart = await _cartService.GetCartAsync(CartId);
-            var item = new ProductCartViewModel
-            {
-                Product = product,
-                QuantityInCart = cart.Lines
-                    .FirstOrDefault(l => l.Product.ProductID == product.ProductID)
-                    ?.Quantity ?? 0
-            };
+            var items = await BuildProductViewModelsAsync(new[] { product });
+            var item = items[0];
 
             ViewData["CartReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
-            return PartialView("_ProductGridItems", new[] { item });
+            return PartialView("_ProductGridItems", items);
+        }
+
+        private async Task<List<ProductCartViewModel>> BuildProductViewModelsAsync(IEnumerable<Product> products)
+        {
+            var cart = await _cartService.GetCartAsync(CartId);
+            var owner = FavoriteOwner.Resolve(User, _httpContextAccessor.HttpContext);
+            var favoriteIds = await _favoriteService.GetFavoriteProductIdsAsync(owner.UserId, owner.SessionId);
+            var favoriteSet = favoriteIds.ToHashSet();
+
+            return products
+                .Select(p => new ProductCartViewModel
+                {
+                    Product = p,
+                    QuantityInCart = cart.Lines
+                        .FirstOrDefault(l => l.Product.ProductID == p.ProductID)
+                        ?.Quantity ?? 0,
+                    IsFavorite = favoriteSet.Contains(p.ProductID)
+                })
+                .ToList();
         }
 
         private ProductFilter BuildFilter()

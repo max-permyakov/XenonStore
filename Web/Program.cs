@@ -71,6 +71,7 @@ try
     builder.Services.AddScoped<IProductService, ProductService>();
     builder.Services.AddScoped<ICartService, CartService>();
     builder.Services.AddScoped<ICartStorage, SessionCartStorage>();
+    builder.Services.AddScoped<IFavoriteService, FavoriteService>();
     builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
     builder.Services.AddScoped<IOrderRepository, EFOrderRepository>();
     builder.Services.AddScoped<ProductImportService>();

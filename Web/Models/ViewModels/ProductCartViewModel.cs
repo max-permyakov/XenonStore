@@ -7,6 +7,7 @@ namespace Xenon.Web.Models.ViewModels
     {
         public Product? Product { get; set; } = null!;
         public int QuantityInCart { get; set; }
+        public bool IsFavorite { get; set; }
     }
 
     public class ProductsListWithCartViewModel

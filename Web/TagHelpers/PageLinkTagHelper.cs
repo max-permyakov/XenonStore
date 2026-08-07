@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using SportsStore.Models.ViewModels;
 using Xenon.Web.Models.ViewModels;
 using static System.Net.Mime.MediaTypeNames;
 namespace Xenon.Web.TagHelpers
