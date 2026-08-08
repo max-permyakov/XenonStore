@@ -1,44 +1,210 @@
-﻿@model Order
-<h2>Check out now</h2>
-<p>Please enter your details, and we'll ship your goods right away!</p>
-<div asp-validation-summary="All" class="text-danger"></div>
+﻿@using Xenon.Web.Models
+@model CheckoutViewModel
+@{
+    Layout = "_CheckoutLayout";
+    ViewData["Title"] = "Оформление заказа";
+    var subtotal = Model.Subtotal;
 
+    string DeliveryPriceText(DeliveryOption option)
+    {
+        if (option.Price == 0) return "бесплатно";
+        if (option.FreeFrom.HasValue)
+            return $"{option.Price.ToString("c")} · бесплатно от {option.FreeFrom.Value.ToString("c")}";
+        return option.Price.ToString("c");
+    }
+}
+
+<h2 class="mb-3">Оформление заказа</h2>
 
 <form asp-action="Checkout" method="post">
     @Html.AntiForgeryToken()
-    <h3>Ship to</h3>
-    <div class="form-group">
-        <label>Name:</label><input asp-for="Name" class="form-control" />
-    </div>
-    <h3>Address</h3>
-    <div class="form-group">
-        <label>Line 1:</label><input asp-for="Line1" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label>Line 2:</label><input asp-for="Line2" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label>Line 3:</label><input asp-for="Line3" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label>City:</label><input asp-for="City" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label>State:</label><input asp-for="State" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label>Zip:</label><input asp-for="Zip" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label>Country:</label><input asp-for="Country" class="form-control" />
-    </div>
-    <h3>Options</h3>
-    <div class="checkbox">
-        <label>
-            <input asp-for="GiftWrap" /> Gift wrap these items
-        </label>
-    </div>
-    <div class="text-center">
-        <input class="btn btn-primary" type="submit" value="Complete Order" />
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card checkout-card mb-3">
+                <div class="card-header"><i class="fas fa-user me-1"></i> Контактные данные</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="Order.Name" class="form-label"></label>
+                        <input asp-for="Order.Name" class="form-control" placeholder="Имя и фамилия получателя" />
+                        <span asp-validation-for="Order.Name" class="text-danger"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Order.Phone" class="form-label"></label>
+                            <input asp-for="Order.Phone" class="form-control" placeholder="+7 (900) 123-45-67" />
+                            <span asp-validation-for="Order.Phone" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Order.Email" class="form-label"></label>
+                            <input asp-for="Order.Email" class="form-control" placeholder="you@example.com" />
+                            <span asp-validation-for="Order.Email" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card checkout-card mb-3">
+                <div class="card-header"><i class="fas fa-map-marker-alt me-1"></i> Адрес доставки</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Order.Country" class="form-label"></label>
+                            <input asp-for="Order.Country" class="form-control" placeholder="Россия" />
+                            <span asp-validation-for="Order.Country" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label asp-for="Order.City" class="form-label"></label>
+                            <input asp-for="Order.City" class="form-control" placeholder="Москва" />
+                            <span asp-validation-for="Order.City" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Order.Street" class="form-label"></label>
+                            <input asp-for="Order.Street" class="form-control" placeholder="Тверская улица" />
+                            <span asp-validation-for="Order.Street" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label asp-for="Order.Building" class="form-label"></label>
+                            <input asp-for="Order.Building" class="form-control" placeholder="7" />
+                            <span asp-validation-for="Order.Building" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label asp-for="Order.Apartment" class="form-label"></label>
+                            <input asp-for="Order.Apartment" class="form-control" placeholder="42" />
+                            <span asp-validation-for="Order.Apartment" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Order.PostalCode" class="form-label"></label>
+                            <input asp-for="Order.PostalCode" class="form-control" placeholder="125009" />
+                            <span asp-validation-for="Order.PostalCode" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    @await Html.PartialAsync("_CheckoutMap", Model.Order)
+                </div>
+            </div>
+
+            <div class="card checkout-card mb-3">
+                <div class="card-header"><i class="fas fa-truck me-1"></i> Способ доставки</div>
+                <div class="card-body">
+                    @foreach (var option in Model.DeliveryOptions)
+                    {
+                        <div class="form-check checkout-option">
+                            <input type="radio" class="form-check-input"
+                                   asp-for="Order.DeliveryMethod" value="@option.Method"
+                                   id="delivery-@((int)option.Method)"
+                                   data-price="@option.Price.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
+                                   data-free-from="@(option.FreeFrom?.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture))" />
+                            <label class="form-check-label" for="delivery-@((int)option.Method)">
+                                <b>@option.Name</b> <span class="text-primary">— @DeliveryPriceText(option)</span>
+                                <div class="text-muted small">@option.Description</div>
+                            </label>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card checkout-card mb-3">
+                <div class="card-header"><i class="fas fa-credit-card me-1"></i> Способ оплаты</div>
+                <div class="card-body">
+                    @foreach (var option in Model.PaymentOptions)
+                    {
+                        <div class="form-check checkout-option">
+                            <input type="radio" class="form-check-input"
+                                   asp-for="Order.PaymentMethod" value="@option.Method"
+                                   id="payment-@((int)option.Method)" />
+                            <label class="form-check-label" for="payment-@((int)option.Method)">
+                                <b>@option.Name</b>
+                                <div class="text-muted small">@option.Description</div>
+                            </label>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card checkout-card mb-3">
+                <div class="card-header"><i class="fas fa-comment me-1"></i> Комментарий к заказу</div>
+                <div class="card-body">
+                    <textarea asp-for="Order.Comment" class="form-control" rows="3"
+                              placeholder="Комментарий (необязательно)"></textarea>
+                    <span asp-validation-for="Order.Comment" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card checkout-card checkout-summary">
+                <div class="card-header"><i class="fas fa-shopping-bag me-1"></i> Ваш заказ</div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush mb-3">
+                        @foreach (var line in Model.Cart.Lines)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-start px-0">
+                                <span class="me-2">
+                                    @line.Product.Name
+                                    <span class="text-muted small d-block">× @line.Quantity</span>
+                                </span>
+                                <span>@((line.Product.Price * line.Quantity).ToString("c"))</span>
+                            </li>
+                        }
+                    </ul>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Подытог</span>
+                        <span>@subtotal.ToString("c")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Доставка</span>
+                        <span id="summary-shipping">@Model.ShippingCost.ToString("c")</span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between fw-bold fs-5">
+                        <span>Итого</span>
+                        <span id="summary-total">@Model.Total.ToString("c")</span>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="fas fa-check me-1"></i> Оформить заказ
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </form>
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        (function () {
+            var subtotal = @Model.Subtotal.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+            var radios = document.querySelectorAll('input[name="Order.DeliveryMethod"]');
+
+            function format(value) {
+                return value.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' });
+            }
+
+            function updateSummary() {
+                var selected = document.querySelector('input[name="Order.DeliveryMethod"]:checked');
+                if (!selected) return;
+                var price = parseFloat(selected.dataset.price || '0');
+                var freeFrom = selected.dataset.freeFrom
+                    ? parseFloat(selected.dataset.freeFrom)
+                    : null;
+                var shipping = (freeFrom !== null && subtotal >= freeFrom) ? 0 : price;
+                document.getElementById('summary-shipping').textContent = format(shipping);
+                document.getElementById('summary-total').textContent = format(subtotal + shipping);
+            }
+
+            radios.forEach(function (radio) {
+                radio.addEventListener('change', updateSummary);
+            });
+            updateSummary();
+        })();
+    </script>
+}

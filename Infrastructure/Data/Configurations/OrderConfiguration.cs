@@ -14,32 +14,71 @@ namespace Xenon.Infrastructure.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(100);
 
-            builder.Property(o => o.Line1)
+            builder.Property(o => o.Phone)
                 .IsRequired()
-                .HasMaxLength(200);
-
-            builder.Property(o => o.Line2)
-                .HasMaxLength(200);
-
-            builder.Property(o => o.Line3)
-                .HasMaxLength(200);
-
-            builder.Property(o => o.City)
-                .IsRequired()
-                .HasMaxLength(100);
-
-            builder.Property(o => o.State)
-                .IsRequired()
-                .HasMaxLength(100);
-
-            builder.Property(o => o.Zip)
                 .HasMaxLength(20);
+
+            builder.Property(o => o.Email)
+                .IsRequired()
+                .HasMaxLength(100);
 
             builder.Property(o => o.Country)
                 .IsRequired()
                 .HasMaxLength(100);
 
-            builder.Property(o => o.GiftWrap)
+            builder.Property(o => o.City)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            builder.Property(o => o.Street)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            builder.Property(o => o.Building)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            builder.Property(o => o.Apartment)
+                .HasMaxLength(50);
+
+            builder.Property(o => o.PostalCode)
+                .IsRequired()
+                .HasMaxLength(10);
+
+            builder.Property(o => o.Latitude);
+
+            builder.Property(o => o.Longitude);
+
+            builder.Property(o => o.DeliveryMethod)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            builder.Property(o => o.PaymentMethod)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            builder.Property(o => o.PaymentStatus)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            builder.Property(o => o.PaymentId)
+                .HasMaxLength(100);
+
+            builder.Property(o => o.ShippingCost)
+                .IsRequired()
+                .HasColumnType("decimal(18,2)");
+
+            builder.Property(o => o.TotalAmount)
+                .IsRequired()
+                .HasColumnType("decimal(18,2)");
+
+            builder.Property(o => o.Comment)
+                .HasMaxLength(1000);
+
+            builder.Property(o => o.OrderDate)
                 .IsRequired();
 
             builder.Property(o => o.Shipped)
@@ -50,8 +89,13 @@ namespace Xenon.Infrastructure.Data.Configurations
                 .HasForeignKey("OrderID")
                 .OnDelete(DeleteBehavior.Cascade);
 
-          
             builder.HasIndex(o => o.Name);
+            builder.HasIndex(o => o.Phone);
+            builder.HasIndex(o => o.Email);
+            builder.HasIndex(o => o.OrderDate);
+            builder.HasIndex(o => o.DeliveryMethod);
+            builder.HasIndex(o => o.PaymentMethod);
+            builder.HasIndex(o => o.PaymentStatus);
             builder.HasIndex(o => o.Shipped);
         }
     }

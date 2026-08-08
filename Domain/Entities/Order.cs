@@ -8,36 +8,64 @@ namespace Xenon.Domain.Models
 
         public ICollection<CartLine> Lines { get; set; } = new List<CartLine>();
 
-        [Required(ErrorMessage = "Please enter a name")]
+        public DateTime OrderDate { get; set; }
+
+        [Required(ErrorMessage = "Укажите имя получателя")]
         [MaxLength(100)]
         public string? Name { get; set; }
 
-        [Required(ErrorMessage = "Please enter the first address line")]
-        [MaxLength(200)]
-        public string? Line1 { get; set; }
-
-        [MaxLength(200)]
-        public string? Line2 { get; set; }
-
-        [MaxLength(200)]
-        public string? Line3 { get; set; }
-
-        [Required(ErrorMessage = "Please enter a city name")]
-        [MaxLength(100)]
-        public string? City { get; set; }
-
-        [Required(ErrorMessage = "Please enter a state name")]
-        [MaxLength(100)]
-        public string? State { get; set; }
-
+        [Required(ErrorMessage = "Укажите телефон для связи")]
         [MaxLength(20)]
-        public string? Zip { get; set; }
+        [RegularExpression(@"^\+?[\d\s\-()]{6,20}$", ErrorMessage = "Укажите корректный номер телефона")]
+        public string? Phone { get; set; }
 
-        [Required(ErrorMessage = "Please enter a country name")]
+        [Required(ErrorMessage = "Укажите email")]
+        [EmailAddress(ErrorMessage = "Укажите корректный email")]
+        [MaxLength(100)]
+        public string? Email { get; set; }
+
+        [Required(ErrorMessage = "Укажите страну")]
         [MaxLength(100)]
         public string? Country { get; set; }
 
-        public bool GiftWrap { get; set; }
+        [Required(ErrorMessage = "Укажите город")]
+        [MaxLength(100)]
+        public string? City { get; set; }
+
+        [Required(ErrorMessage = "Укажите улицу")]
+        [MaxLength(200)]
+        public string? Street { get; set; }
+
+        [Required(ErrorMessage = "Укажите номер дома")]
+        [MaxLength(50)]
+        public string? Building { get; set; }
+
+        [MaxLength(50)]
+        public string? Apartment { get; set; }
+
+        [Required(ErrorMessage = "Укажите почтовый индекс")]
+        [MaxLength(10)]
+        [RegularExpression(@"^\d{5,6}$", ErrorMessage = "Индекс должен содержать 5-6 цифр")]
+        public string? PostalCode { get; set; }
+
+        public double? Latitude { get; set; }
+
+        public double? Longitude { get; set; }
+
+        public DeliveryMethod DeliveryMethod { get; set; }
+
+        public PaymentMethod PaymentMethod { get; set; }
+
+        public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
+
+        public string? PaymentId { get; set; }
+
+        public decimal ShippingCost { get; set; }
+
+        public decimal TotalAmount { get; set; }
+
+        [MaxLength(1000)]
+        public string? Comment { get; set; }
 
         public bool Shipped { get; set; }
     }

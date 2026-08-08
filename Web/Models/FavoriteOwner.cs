@@ -7,9 +7,7 @@ namespace Xenon.Web.Models
     {
         private const string GuestCookieName = "Xenon.FavoritesGuest";
 
-        public static (string? UserId, string? SessionId) Resolve(
-            ClaimsPrincipal? user,
-            HttpContext? httpContext)
+        public static (string? UserId, string? SessionId) Resolve(ClaimsPrincipal? user, HttpContext? httpContext)
         {
             if (user?.Identity?.IsAuthenticated == true)
             {

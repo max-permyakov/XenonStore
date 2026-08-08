@@ -25,17 +25,22 @@ namespace Xenon.Infrastructure.Services
             var productList = products.ToList();
             var orderFaker = new Faker<Order>()
                 .RuleFor(o => o.Name, f => f.Person.FullName)
-                .RuleFor(o => o.Line1, f => f.Address.StreetAddress())
-                .RuleFor(o => o.Line2, f => f.Address.SecondaryAddress().OrNull(f))
-                .RuleFor(o => o.City, f => f.Address.City())
-                .RuleFor(o => o.State, f => f.Address.State())
-                .RuleFor(o => o.Zip, f => f.Address.ZipCode())
+                .RuleFor(o => o.Phone, f => f.Phone.PhoneNumber())
+                .RuleFor(o => o.Email, f => f.Person.Email)
                 .RuleFor(o => o.Country, f => f.Address.Country())
-                .RuleFor(o => o.GiftWrap, f => f.Random.Bool(0.3f))
+                .RuleFor(o => o.City, f => f.Address.City())
+                .RuleFor(o => o.Street, f => f.Address.StreetName())
+                .RuleFor(o => o.Building, f => f.Address.BuildingNumber())
+                .RuleFor(o => o.Apartment, f => f.Address.SecondaryAddress().OrNull(f))
+                .RuleFor(o => o.PostalCode, f => f.Address.ZipCode())
+                .RuleFor(o => o.OrderDate, f => f.Date.Past(1))
+                .RuleFor(o => o.DeliveryMethod, f => f.PickRandom<DeliveryMethod>())
+                .RuleFor(o => o.PaymentMethod, f => f.PickRandom<PaymentMethod>())
+                .RuleFor(o => o.PaymentStatus, f => f.PickRandom<PaymentStatus>())
+                .RuleFor(o => o.Comment, f => f.Lorem.Sentence().OrNull(f))
                 .RuleFor(o => o.Shipped, f => f.Random.Bool(0.7f))
                 .RuleFor(o => o.Lines, (f, o) =>
                 {
-                
                     int linesCount = f.Random.Int(1, 5);
                     var lines = new List<CartLine>();
                     for (int i = 0; i < linesCount; i++)
@@ -44,6 +49,9 @@ namespace Xenon.Infrastructure.Services
                         var quantity = f.Random.Int(1, 10);
                         lines.Add(new CartLine { Product = product, Quantity = quantity });
                     }
+                    decimal subtotal = lines.Sum(l => l.Product.Price * l.Quantity);
+                    o.ShippingCost = f.Random.Int(0, 5) * 50;
+                    o.TotalAmount = subtotal + o.ShippingCost;
                     return lines;
                 });
 
