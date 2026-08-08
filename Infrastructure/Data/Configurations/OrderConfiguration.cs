@@ -42,7 +42,6 @@ namespace Xenon.Infrastructure.Data.Configurations
                 .HasMaxLength(50);
 
             builder.Property(o => o.PostalCode)
-                .IsRequired()
                 .HasMaxLength(10);
 
             builder.Property(o => o.Latitude);

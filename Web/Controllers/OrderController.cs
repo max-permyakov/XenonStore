@@ -61,7 +61,7 @@ namespace Xenon.Web.Controllers
             var cart = await _cartService.GetCartAsync(CartId);
             if (cart.Lines.Count == 0)
             {
-                ModelState.AddModelError("", "Ваша корзина пуста!");
+                ModelState.AddModelError("", "Your cart is empty!");
             }
             if (!ModelState.IsValid)
             {

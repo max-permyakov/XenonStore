@@ -2,19 +2,19 @@
 @model CheckoutViewModel
 @{
     Layout = "_CheckoutLayout";
-    ViewData["Title"] = "Оформление заказа";
+    ViewData["Title"] = "Checkout";
     var subtotal = Model.Subtotal;
 
     string DeliveryPriceText(DeliveryOption option)
     {
-        if (option.Price == 0) return "бесплатно";
+        if (option.Price == 0) return "free";
         if (option.FreeFrom.HasValue)
-            return $"{option.Price.ToString("c")} · бесплатно от {option.FreeFrom.Value.ToString("c")}";
+            return $"{option.Price.ToString("c")} · free from {option.FreeFrom.Value.ToString("c")}";
         return option.Price.ToString("c");
     }
 }
 
-<h2 class="mb-3">Оформление заказа</h2>
+<h2 class="mb-3">Checkout</h2>
 
 <form asp-action="Checkout" method="post">
     @Html.AntiForgeryToken()
@@ -23,17 +23,17 @@
     <div class="row">
         <div class="col-lg-8">
             <div class="card checkout-card mb-3">
-                <div class="card-header"><i class="fas fa-user me-1"></i> Контактные данные</div>
+                <div class="card-header"><i class="fas fa-user me-1"></i> Contact details</div>
                 <div class="card-body">
                     <div class="mb-3">
                         <label asp-for="Order.Name" class="form-label"></label>
-                        <input asp-for="Order.Name" class="form-control" placeholder="Имя и фамилия получателя" />
+                        <input asp-for="Order.Name" class="form-control" placeholder="Recipient full name" />
                         <span asp-validation-for="Order.Name" class="text-danger"></span>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label asp-for="Order.Phone" class="form-label"></label>
-                            <input asp-for="Order.Phone" class="form-control" placeholder="+7 (900) 123-45-67" />
+                            <input asp-for="Order.Phone" class="form-control" placeholder="Your phone number" />
                             <span asp-validation-for="Order.Phone" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -46,41 +46,41 @@
             </div>
 
             <div class="card checkout-card mb-3">
-                <div class="card-header"><i class="fas fa-map-marker-alt me-1"></i> Адрес доставки</div>
+                <div class="card-header"><i class="fas fa-map-marker-alt me-1"></i> Delivery address</div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label asp-for="Order.Country" class="form-label"></label>
-                            <input asp-for="Order.Country" class="form-control" placeholder="Россия" />
+                            <input asp-for="Order.Country" class="form-control" placeholder="Russia" />
                             <span asp-validation-for="Order.Country" class="text-danger"></span>
                         </div>
                         <div class="col-md-8 mb-3">
                             <label asp-for="Order.City" class="form-label"></label>
-                            <input asp-for="Order.City" class="form-control" placeholder="Москва" />
+                            <input asp-for="Order.City" class="form-control" placeholder="Moscow" />
                             <span asp-validation-for="Order.City" class="text-danger"></span>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label asp-for="Order.Street" class="form-label"></label>
-                            <input asp-for="Order.Street" class="form-control" placeholder="Тверская улица" />
+                            <input asp-for="Order.Street" class="form-control" placeholder="Street address" />
                             <span asp-validation-for="Order.Street" class="text-danger"></span>
                         </div>
                         <div class="col-md-3 mb-3">
                             <label asp-for="Order.Building" class="form-label"></label>
-                            <input asp-for="Order.Building" class="form-control" placeholder="7" />
+                            <input asp-for="Order.Building" class="form-control" placeholder="House number" />
                             <span asp-validation-for="Order.Building" class="text-danger"></span>
                         </div>
                         <div class="col-md-3 mb-3">
                             <label asp-for="Order.Apartment" class="form-label"></label>
-                            <input asp-for="Order.Apartment" class="form-control" placeholder="42" />
+                            <input asp-for="Order.Apartment" class="form-control" placeholder="Apartment" />
                             <span asp-validation-for="Order.Apartment" class="text-danger"></span>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label asp-for="Order.PostalCode" class="form-label"></label>
-                            <input asp-for="Order.PostalCode" class="form-control" placeholder="125009" />
+                            <input asp-for="Order.PostalCode" class="form-control" placeholder="123456" />
                             <span asp-validation-for="Order.PostalCode" class="text-danger"></span>
                         </div>
                     </div>
@@ -90,7 +90,7 @@
             </div>
 
             <div class="card checkout-card mb-3">
-                <div class="card-header"><i class="fas fa-truck me-1"></i> Способ доставки</div>
+                <div class="card-header"><i class="fas fa-truck me-1"></i> Delivery method</div>
                 <div class="card-body">
                     @foreach (var option in Model.DeliveryOptions)
                     {
@@ -110,7 +110,7 @@
             </div>
 
             <div class="card checkout-card mb-3">
-                <div class="card-header"><i class="fas fa-credit-card me-1"></i> Способ оплаты</div>
+                <div class="card-header"><i class="fas fa-credit-card me-1"></i> Payment method</div>
                 <div class="card-body">
                     @foreach (var option in Model.PaymentOptions)
                     {
@@ -128,10 +128,10 @@
             </div>
 
             <div class="card checkout-card mb-3">
-                <div class="card-header"><i class="fas fa-comment me-1"></i> Комментарий к заказу</div>
+                <div class="card-header"><i class="fas fa-comment me-1"></i> Order comment</div>
                 <div class="card-body">
                     <textarea asp-for="Order.Comment" class="form-control" rows="3"
-                              placeholder="Комментарий (необязательно)"></textarea>
+                              placeholder="Comment (optional)"></textarea>
                     <span asp-validation-for="Order.Comment" class="text-danger"></span>
                 </div>
             </div>
@@ -139,7 +139,7 @@
 
         <div class="col-lg-4">
             <div class="card checkout-card checkout-summary">
-                <div class="card-header"><i class="fas fa-shopping-bag me-1"></i> Ваш заказ</div>
+                <div class="card-header"><i class="fas fa-shopping-bag me-1"></i> Your order</div>
                 <div class="card-body">
                     <ul class="list-group list-group-flush mb-3">
                         @foreach (var line in Model.Cart.Lines)
@@ -154,22 +154,22 @@
                         }
                     </ul>
                     <div class="d-flex justify-content-between mb-1">
-                        <span>Подытог</span>
+                        <span>Subtotal</span>
                         <span>@subtotal.ToString("c")</span>
                     </div>
                     <div class="d-flex justify-content-between mb-1">
-                        <span>Доставка</span>
+                        <span>Delivery</span>
                         <span id="summary-shipping">@Model.ShippingCost.ToString("c")</span>
                     </div>
                     <hr />
                     <div class="d-flex justify-content-between fw-bold fs-5">
-                        <span>Итого</span>
+                        <span>Total</span>
                         <span id="summary-total">@Model.Total.ToString("c")</span>
                     </div>
                 </div>
                 <div class="card-footer bg-white">
                     <button type="submit" class="btn btn-primary btn-lg w-100">
-                        <i class="fas fa-check me-1"></i> Оформить заказ
+                        <i class="fas fa-check me-1"></i> Place order
                     </button>
                 </div>
             </div>
@@ -180,13 +180,14 @@
 @section Scripts {
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/js/checkout-map.js"></script>
     <script>
         (function () {
             var subtotal = @Model.Subtotal.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
             var radios = document.querySelectorAll('input[name="Order.DeliveryMethod"]');
 
             function format(value) {
-                return value.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' });
+                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
             }
 
             function updateSummary() {

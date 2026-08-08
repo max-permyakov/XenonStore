@@ -26,23 +26,23 @@ namespace Xenon.Web.Models
                 new()
                 {
                     Method = DeliveryMethod.Courier,
-                    Name = "Курьером",
-                    Description = "Доставим до двери в течение 1-3 дней",
+                    Name = "Courier",
+                    Description = "Delivery to your door within 1-3 days",
                     Price = 300m,
                     FreeFrom = 3000m
                 },
                 new()
                 {
                     Method = DeliveryMethod.Post,
-                    Name = "Почтой России",
-                    Description = "Отправка почтовым отправлением в отделение",
+                    Name = "Postal service",
+                    Description = "Shipped to your local post office",
                     Price = 250m
                 },
                 new()
                 {
                     Method = DeliveryMethod.PickupPoint,
-                    Name = "Пункт выдачи / Самовывоз",
-                    Description = "Бесплатно в пункте выдачи рядом с вами",
+                    Name = "Pickup point",
+                    Description = "Free pickup at a pickup point near you",
                     Price = 0m
                 }
             };
@@ -53,26 +53,26 @@ namespace Xenon.Web.Models
                 new()
                 {
                     Method = PaymentMethod.Sbp,
-                    Name = "СБП (Система быстрых платежей)",
-                    Description = "Оплата по QR-коду через приложение вашего банка"
+                    Name = "SBP (Fast Payment System)",
+                    Description = "Pay by QR code through your bank's app"
                 },
                 new()
                 {
                     Method = PaymentMethod.Card,
-                    Name = "Банковская карта",
-                    Description = "MIR, Visa, MasterCard — онлайн через защищённый шлюз"
+                    Name = "Bank card",
+                    Description = "MIR, Visa, MasterCard — pay online via a secure gateway"
                 },
                 new()
                 {
                     Method = PaymentMethod.CashOnDelivery,
-                    Name = "При получении",
-                    Description = "Наличными или картой курьеру / в пункте выдачи"
+                    Name = "Cash on delivery",
+                    Description = "Pay in cash or by card on delivery / at the pickup point"
                 },
                 new()
                 {
                     Method = PaymentMethod.EWallet,
-                    Name = "Электронный кошелёк",
-                    Description = "ЮMoney и другие электронные кошельки"
+                    Name = "E-wallet",
+                    Description = "YooMoney and other e-wallets"
                 }
             };
 
@@ -89,10 +89,10 @@ namespace Xenon.Web.Models
 
         public static string PaymentStatusName(PaymentStatus status) => status switch
         {
-            PaymentStatus.Pending => "Ожидает оплаты",
-            PaymentStatus.Paid => "Оплачен",
-            PaymentStatus.Failed => "Оплата не прошла",
-            PaymentStatus.Refunded => "Возврат",
+            PaymentStatus.Pending => "Pending payment",
+            PaymentStatus.Paid => "Paid",
+            PaymentStatus.Failed => "Payment failed",
+            PaymentStatus.Refunded => "Refunded",
             _ => status.ToString()
         };
     }

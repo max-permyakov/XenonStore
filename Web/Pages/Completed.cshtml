@@ -3,7 +3,7 @@
 @model CompletedModel
 @{
     Layout = "_CheckoutLayout";
-    ViewData["Title"] = "Заказ оформлен";
+    ViewData["Title"] = "Order placed";
     var order = Model.Order;
     var delivery = order != null
         ? OrderCheckoutOptions.DeliveryOptions.First(o => o.Method == order.DeliveryMethod).Name
@@ -14,15 +14,26 @@
     var status = order != null
         ? OrderCheckoutOptions.PaymentStatusName(order.PaymentStatus)
         : null;
+    var addressParts = new List<string>();
+    if (order != null)
+    {
+        if (!string.IsNullOrEmpty(order.Country)) addressParts.Add(order.Country);
+        if (!string.IsNullOrEmpty(order.City)) addressParts.Add(order.City);
+        if (!string.IsNullOrEmpty(order.Street)) addressParts.Add(order.Street);
+        if (!string.IsNullOrEmpty(order.Building)) addressParts.Add(order.Building);
+        if (!string.IsNullOrEmpty(order.Apartment)) addressParts.Add("Apt. " + order.Apartment);
+        if (!string.IsNullOrEmpty(order.PostalCode)) addressParts.Add(order.PostalCode);
+    }
+    var address = string.Join(", ", addressParts);
 }
 
 @if (order == null)
 {
     <div class="text-center py-5">
-        <h2>Заказ не найден</h2>
-        <p class="text-muted">Возможно, ссылка устарела.</p>
+        <h2>Order not found</h2>
+        <p class="text-muted">The link may be outdated.</p>
         <a class="btn btn-primary" asp-controller="Home" asp-action="Index">
-            <i class="fas fa-store me-1"></i> Вернуться в магазин
+            <i class="fas fa-store me-1"></i> Back to store
         </a>
     </div>
 }
@@ -31,24 +42,24 @@ else
     <div class="mx-auto" style="max-width: 760px;">
         <div class="text-center mb-4">
             <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
-            <h2 class="mt-2">Спасибо за заказ!</h2>
+            <h2 class="mt-2">Thank you for your order!</h2>
             <p class="text-muted mb-1">
-                Заказ №@order.OrderID оформлен @order.OrderDate.ToLocalTime().ToString("g")
+                Order No. @order.OrderID placed on @order.OrderDate.ToLocalTime().ToString("g")
             </p>
             <p class="text-muted small mb-0">
-                Оплата: @payment · <span class="badge bg-secondary">@status</span>
+                Payment: @payment · <span class="badge bg-secondary">@status</span>
             </p>
         </div>
 
         <div class="card checkout-card mb-3">
-            <div class="card-header"><i class="fas fa-shopping-bag me-1"></i> Состав заказа</div>
+            <div class="card-header"><i class="fas fa-shopping-bag me-1"></i> Order items</div>
             <div class="card-body p-0">
                 <table class="table table-striped mb-0">
                     <thead>
                         <tr>
-                            <th>Товар</th>
-                            <th class="text-center">Кол-во</th>
-                            <th class="text-end">Сумма</th>
+                            <th>Product</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-end">Amount</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -66,22 +77,15 @@ else
         </div>
 
         <div class="card checkout-card mb-3">
-            <div class="card-header"><i class="fas fa-map-marker-alt me-1"></i> Адрес доставки</div>
+            <div class="card-header"><i class="fas fa-map-marker-alt me-1"></i> Delivery address</div>
             <div class="card-body">
-                <p class="mb-1"><b>Получатель:</b> @order.Name (@order.Phone)</p>
+                <p class="mb-1"><b>Recipient:</b> @order.Name (@order.Phone)</p>
                 <p class="mb-1"><b>Email:</b> @order.Email</p>
-                <p class="mb-1">
-                    <b>Адрес:</b>
-                    @order.Country, @order.PostalCode, @order.City, ул. @order.Street, д. @order.Building
-                    @if (!string.IsNullOrEmpty(order.Apartment))
-                    {
-                        <span>, кв. @order.Apartment</span>
-                    }
-                </p>
-                <p class="mb-0"><b>Доставка:</b> @delivery</p>
+                <p class="mb-1"><b>Address:</b> @address</p>
+                <p class="mb-0"><b>Delivery:</b> @delivery</p>
                 @if (!string.IsNullOrEmpty(order.Comment))
                 {
-                    <p class="mb-0 mt-2"><b>Комментарий:</b> @order.Comment</p>
+                    <p class="mb-0 mt-2"><b>Comment:</b> @order.Comment</p>
                 }
             </div>
         </div>
@@ -89,22 +93,22 @@ else
         <div class="card checkout-card">
             <div class="card-body">
                 <div class="d-flex justify-content-between mb-1">
-                    <span>Подытог</span>
+                    <span>Subtotal</span>
                     <span>@((order.TotalAmount - order.ShippingCost).ToString("c"))</span>
                 </div>
                 <div class="d-flex justify-content-between mb-1">
-                    <span>Доставка</span>
+                    <span>Delivery</span>
                     <span>@order.ShippingCost.ToString("c")</span>
                 </div>
                 <hr />
                 <div class="d-flex justify-content-between fw-bold fs-5">
-                    <span>Итого</span>
+                    <span>Total</span>
                     <span>@order.TotalAmount.ToString("c")</span>
                 </div>
             </div>
             <div class="card-footer bg-white">
                 <a class="btn btn-primary w-100" asp-controller="Home" asp-action="Index">
-                    <i class="fas fa-store me-1"></i> Вернуться в магазин
+                    <i class="fas fa-store me-1"></i> Back to store
                 </a>
             </div>
         </div>

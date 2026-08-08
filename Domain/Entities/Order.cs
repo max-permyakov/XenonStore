@@ -10,42 +10,50 @@ namespace Xenon.Domain.Models
 
         public DateTime OrderDate { get; set; }
 
-        [Required(ErrorMessage = "Укажите имя получателя")]
+        [Display(Name = "Full name")]
+        [Required(ErrorMessage = "Please enter the recipient's name")]
         [MaxLength(100)]
         public string? Name { get; set; }
 
-        [Required(ErrorMessage = "Укажите телефон для связи")]
+        [Display(Name = "Phone")]
+        [Required(ErrorMessage = "Please enter a phone number")]
         [MaxLength(20)]
-        [RegularExpression(@"^\+?[\d\s\-()]{6,20}$", ErrorMessage = "Укажите корректный номер телефона")]
+        [RegularExpression(@"^\+?[\d\s\-()]{6,20}$", ErrorMessage = "Please enter a valid phone number")]
         public string? Phone { get; set; }
 
-        [Required(ErrorMessage = "Укажите email")]
-        [EmailAddress(ErrorMessage = "Укажите корректный email")]
+        [Display(Name = "Email")]
+        [Required(ErrorMessage = "Please enter an email address")]
+        [EmailAddress(ErrorMessage = "Please enter a valid email address")]
         [MaxLength(100)]
         public string? Email { get; set; }
 
-        [Required(ErrorMessage = "Укажите страну")]
+        [Display(Name = "Country")]
+        [Required(ErrorMessage = "Please enter a country")]
         [MaxLength(100)]
         public string? Country { get; set; }
 
-        [Required(ErrorMessage = "Укажите город")]
+        [Display(Name = "City")]
+        [Required(ErrorMessage = "Please enter a city")]
         [MaxLength(100)]
         public string? City { get; set; }
 
-        [Required(ErrorMessage = "Укажите улицу")]
+        [Display(Name = "Street")]
+        [Required(ErrorMessage = "Please enter a street")]
         [MaxLength(200)]
         public string? Street { get; set; }
 
-        [Required(ErrorMessage = "Укажите номер дома")]
+        [Display(Name = "Building")]
+        [Required(ErrorMessage = "Please enter a house number")]
         [MaxLength(50)]
         public string? Building { get; set; }
 
+        [Display(Name = "Apartment")]
         [MaxLength(50)]
         public string? Apartment { get; set; }
 
-        [Required(ErrorMessage = "Укажите почтовый индекс")]
+        [Display(Name = "Postal code")]
         [MaxLength(10)]
-        [RegularExpression(@"^\d{5,6}$", ErrorMessage = "Индекс должен содержать 5-6 цифр")]
+        [RegularExpression(@"^\d{5,6}$", ErrorMessage = "Postal code must contain 5-6 digits")]
         public string? PostalCode { get; set; }
 
         public double? Latitude { get; set; }
