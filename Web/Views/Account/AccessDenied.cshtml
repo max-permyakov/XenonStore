@@ -1,0 +1,46 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xenon — Доступ запрещён</title>
+    <link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/lib/font-awesome/css/all.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .error-card {
+            background: #16213e;
+            border: 1px solid #0f3460;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            padding: 3rem;
+        }
+        .error-card i { font-size: 4rem; color: #e94560; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="error-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h2 class="text-white mt-3">Доступ запрещён</h2>
+                    <p class="text-muted">У вас нет прав для просмотра этой страницы.</p>
+                    <a href="/" class="btn btn-outline-light mt-2"><i class="fas fa-arrow-left me-1"></i> На главную</a>
+                    <a href="/Account/Login" class="btn btn-outline-primary mt-2 ms-2"><i class="fas fa-sign-in-alt me-1"></i> Войти</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

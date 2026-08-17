@@ -1,18 +1,153 @@
-﻿@page "/admin"
+﻿@page "/Admin"
+@model Xenon.Web.Pages.Admin.IndexModel
 @{
-    Layout = null;
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Dashboard";
 }
-@using Microsoft.AspNetCore.Authorization
-@attribute [Authorize]
-<!DOCTYPE html>
-<html>
-<head>
-    <title>SportsStore Admin</title>
-    <link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
-    <base href="/" />
-</head>
-<body>
-    <component type="typeof(Routed)" render-mode="Server" /> 
-    <script src="/_framework/blazor.server.js"></script>
-</body>
-</html>
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h4 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h4>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card card bg-dark p-3">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon bg-primary bg-opacity-25 text-primary me-3">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div>
+                    <div class="stat-value">@Model.TotalProducts</div>
+                    <div class="stat-label">Products</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card card bg-dark p-3">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon bg-success bg-opacity-25 text-success me-3">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div>
+                    <div class="stat-value">@Model.TotalOrders</div>
+                    <div class="stat-label">Orders</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card card bg-dark p-3">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon bg-info bg-opacity-25 text-info me-3">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <div class="stat-value">@Model.TotalUsers</div>
+                    <div class="stat-label">Users</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card card bg-dark p-3">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon bg-warning bg-opacity-25 text-warning me-3">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div>
+                    <div class="stat-value">@Model.UnreadNotifications</div>
+                    <div class="stat-label">Unread Notifications</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header border-secondary">
+                <i class="fas fa-shopping-cart me-2"></i>Recent Orders
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-admin table-dark mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.RecentOrders.Count == 0)
+                            {
+                                <tr><td colspan="5" class="text-center text-muted py-3">No orders yet</td></tr>
+                            }
+                            else
+                            {
+                                @foreach (var order in Model.RecentOrders)
+                                {
+                                    <tr>
+                                        <td>@order.OrderID</td>
+                                        <td>@order.OrderDate.ToString("dd.MM.yyyy HH:mm")</td>
+                                        <td>@order.Name</td>
+                                        <td>@order.TotalAmount.ToString("N2")</td>
+                                        <td>
+                                            @switch (order.PaymentStatus)
+                                            {
+                                                case PaymentStatus.Paid:
+                                                    <span class="badge bg-success">Paid</span>
+                                                    break;
+                                                case PaymentStatus.Failed:
+                                                    <span class="badge bg-danger">Failed</span>
+                                                    break;
+                                                case PaymentStatus.Refunded:
+                                                    <span class="badge bg-warning text-dark">Refunded</span>
+                                                    break;
+                                                default:
+                                                    <span class="badge bg-secondary">Pending</span>
+                                                    break;
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header border-secondary">
+                <i class="fas fa-bell me-2"></i>Recent Notifications
+            </div>
+            <div class="card-body">
+                @if (Model.RecentNotifications.Count == 0)
+                {
+                    <p class="text-muted text-center py-3 mb-0">No notifications</p>
+                }
+                else
+                {
+                    @foreach (var n in Model.RecentNotifications)
+                    {
+                        <div class="notification-item @(n.IsRead ? "" : "unread")">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong class="small">@n.Title</strong>
+                                    <p class="mb-0 small text-muted">@n.Message</p>
+                                </div>
+                                <small class="text-muted text-nowrap ms-2">@n.CreatedAt.ToString("dd.MM HH:mm")</small>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

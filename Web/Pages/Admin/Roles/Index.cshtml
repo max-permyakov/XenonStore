@@ -1,0 +1,81 @@
+@page
+@model Xenon.Web.Pages.Admin.Roles.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Roles";
+}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h4 class="mb-0"><i class="fas fa-user-shield me-2"></i>Roles</h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createRoleModal">
+        <i class="fas fa-plus me-1"></i>Create Role
+    </button>
+</div>
+
+<div class="card bg-dark border-secondary">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-admin table-dark mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Members</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Roles.Count == 0)
+                    {
+                        <tr><td colspan="3" class="text-center text-muted py-3">No roles found</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var role in Model.Roles)
+                        {
+                            <tr>
+                                <td><strong>@role.Name</strong></td>
+                                <td class="text-muted">
+                                    @await Model.GetMembersString(role.Name)
+                                </td>
+                                <td class="text-end">
+                                    <form method="post" asp-page-handler="Delete" class="d-inline">
+                                        <input type="hidden" name="id" value="@role.Id" />
+                                        <button type="submit" class="btn btn-outline-danger btn-sm-icon"
+                                                onclick="return confirm('Delete role @role.Name?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="createRoleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark border-secondary">
+            <form method="post" asp-page-handler="Create">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title">Create Role</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body form-admin">
+                    <div class="mb-3">
+                        <label class="form-label">Role Name</label>
+                        <input name="roleName" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Create
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

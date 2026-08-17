@@ -21,6 +21,10 @@ namespace Xenon.Infrastructure.Data.Configurations
                 .HasColumnType("decimal(8, 2)")
                 .IsRequired();
 
+            builder.Property(p => p.Discount)
+                .HasColumnType("decimal(5, 2)")
+                .IsRequired(false);
+
             builder.HasOne(p => p.Category)
                 .WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryId)

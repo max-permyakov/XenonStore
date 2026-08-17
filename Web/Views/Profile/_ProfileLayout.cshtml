@@ -1,0 +1,58 @@
+@{
+    Layout = "_CheckoutLayout";
+    ViewData["Title"] = "Мой профиль";
+
+    var user = Model as Xenon.Domain.Models.ApplicationUser;
+}
+<div class="row">
+    <div class="col-md-3">
+        <div class="card mb-3">
+            <div class="card-body text-center">
+                @if (!string.IsNullOrEmpty(user?.AvatarUrl))
+                {
+                    <img src="@user.AvatarUrl" class="rounded-circle mb-2" width="80" height="80" alt="avatar" />
+                }
+                else
+                {
+                    <i class="fas fa-user-circle fa-5x text-muted mb-2"></i>
+                }
+                <h6 class="mb-0">@user?.FullName</h6>
+                <small class="text-muted">@user?.Email</small>
+            </div>
+        </div>
+        <div class="list-group mb-3">
+            <a asp-action="Index" class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                <i class="fas fa-home me-2"></i> Обзор
+            </a>
+            <a asp-action="Orders" class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["action"]?.ToString() == "Orders" ? "active" : "")">
+                <i class="fas fa-shopping-bag me-2"></i> Мои заказы
+            </a>
+            <a asp-action="Settings" class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["action"]?.ToString() == "Settings" ? "active" : "")">
+                <i class="fas fa-cog me-2"></i> Настройки
+            </a>
+            <a asp-action="Security" class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["action"]?.ToString() == "Security" ? "active" : "")">
+                <i class="fas fa-shield-alt me-2"></i> Безопасность
+            </a>
+            <a href="/Cart" class="list-group-item list-group-item-action">
+                <i class="fas fa-shopping-cart me-2"></i> Корзина
+            </a>
+        </div>
+    </div>
+    <div class="col-md-9">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show">
+                <i class="fas fa-check-circle me-1"></i> @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="fas fa-exclamation-circle me-1"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @RenderBody()
+    </div>
+</div>

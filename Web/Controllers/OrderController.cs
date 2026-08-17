@@ -8,7 +8,6 @@ using Xenon.Web.Models;
 using Xenon.Web.Models.ViewModels;
 
 namespace Xenon.Web.Controllers
-
 {
     [Route("Order/[action]")]
     public class OrderController : Controller
@@ -16,29 +15,41 @@ namespace Xenon.Web.Controllers
         private readonly IOrderRepository repository;
         private readonly ICartService _cartService;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<OrderController> _logger;
+        private readonly ILoggingService _loggingService;
 
-        private string CartId => _httpContextAccessor.HttpContext?.Session?.Id
-            ?? Guid.NewGuid().ToString();
+        private string GetCartId()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!string.IsNullOrEmpty(userId))
+                    return userId;
+            }
+            return _httpContextAccessor.HttpContext?.Session?.Id ?? Guid.NewGuid().ToString();
+        }
 
-        public OrderController(IOrderRepository repoService,
+        public OrderController(
+            IOrderRepository repoService,
             ICartService cartService,
             IHttpContextAccessor httpContextAccessor,
-            UserManager<IdentityUser> userManager,
-            ILogger<OrderController> logger)
+            UserManager<ApplicationUser> userManager,
+            ILogger<OrderController> logger,
+            ILoggingService loggingService)
         {
             repository = repoService;
             _cartService = cartService;
             _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
             _logger = logger;
+            _loggingService = loggingService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Checkout()
         {
-            var cart = await _cartService.GetCartAsync(CartId);
+            var cart = await _cartService.GetCartAsync(GetCartId());
             if (cart.Lines.Count == 0)
             {
                 return RedirectToPage("/Cart");
@@ -49,23 +60,54 @@ namespace Xenon.Web.Controllers
                 DeliveryMethod = DeliveryMethod.Courier,
                 PaymentMethod = PaymentMethod.Sbp
             };
-            await PrefillFromUserAsync(order);
 
-            return View(BuildViewModel(order, cart));
+            ApplicationUser? userProfile = null;
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    userProfile = await _userManager.FindByIdAsync(userId);
+                    if (userProfile != null)
+                    {
+                        order.Name = userProfile.FullName;
+                        order.Email = userProfile.Email;
+                        order.Phone = userProfile.PhoneNumber;
+                        order.Country = userProfile.Country;
+                        order.City = userProfile.City;
+                        order.Street = userProfile.Address;
+                        order.UserId = userId;
+                    }
+                }
+            }
+
+            return View(BuildViewModel(order, cart, userProfile));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Checkout(Order order)
         {
-            var cart = await _cartService.GetCartAsync(CartId);
+            var cart = await _cartService.GetCartAsync(GetCartId());
             if (cart.Lines.Count == 0)
             {
-                ModelState.AddModelError("", "Your cart is empty!");
+                ModelState.AddModelError("", "Корзина пуста!");
             }
+
+            ApplicationUser? userProfile = null;
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    userProfile = await _userManager.FindByIdAsync(userId);
+                    order.UserId = userId;
+                }
+            }
+
             if (!ModelState.IsValid)
             {
-                return View(BuildViewModel(order, cart));
+                return View(BuildViewModel(order, cart, userProfile));
             }
 
             var subtotal = cart.ComputeTotalValue();
@@ -77,38 +119,44 @@ namespace Xenon.Web.Controllers
             order.Lines = cart.Lines.ToArray();
 
             repository.SaveOrder(order);
-            await _cartService.ClearCartAsync(CartId);
-            _logger.LogInformation($"New order #{order.OrderID} by {order.Name}");
+            await _cartService.ClearCartAsync(GetCartId());
+
+            await _loggingService.LogInfoAsync("Order",
+                $"New order #{order.OrderID}: {order.TotalAmount:N2} by {order.Name}",
+                userId: order.UserId, userName: order.Name,
+                ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString(),
+                entityType: "Order", entityId: order.OrderID);
+
+            if (order.TotalAmount >= 10000m)
+            {
+                await _loggingService.LogWarningAsync("Order",
+                    $"Large order #{order.OrderID}: {order.TotalAmount:N2} by {order.Name}",
+                    userId: order.UserId, userName: order.Name,
+                    ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    entityType: "Order", entityId: order.OrderID,
+                    metadata: $"{{\"amount\":{order.TotalAmount},\"items\":{cart.Lines.Count}}}");
+
+                await _loggingService.NotifyAsync(
+                    "Крупный заказ",
+                    $"Заказ #{order.OrderID} на сумму {order.TotalAmount:N2}₽ от {order.Name}",
+                    "Warning",
+                    $"/Admin/Orders/Details/{order.OrderID}");
+            }
 
             return RedirectToPage("/Completed", new { orderId = order.OrderID });
         }
 
-        private CheckoutViewModel BuildViewModel(Order order, Cart cart)
+        private CheckoutViewModel BuildViewModel(Order order, Cart cart, ApplicationUser? userProfile = null)
         {
             return new CheckoutViewModel
             {
                 Order = order,
                 Cart = cart,
                 ShippingCost = OrderCheckoutOptions.GetShippingCost(
-                    order.DeliveryMethod, cart.ComputeTotalValue())
+                    order.DeliveryMethod, cart.ComputeTotalValue()),
+                IsAuthenticated = User.Identity?.IsAuthenticated == true,
+                UserProfile = userProfile
             };
-        }
-
-        private async Task PrefillFromUserAsync(Order order)
-        {
-            if (User.Identity?.IsAuthenticated == true)
-            {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (!string.IsNullOrEmpty(userId))
-                {
-                    var user = await _userManager.FindByIdAsync(userId);
-                    if (user != null)
-                    {
-                        order.Name ??= user.UserName;
-                        order.Email ??= user.Email;
-                    }
-                }
-            }
         }
     }
 }

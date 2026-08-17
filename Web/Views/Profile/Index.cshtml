@@ -1,0 +1,99 @@
+@using Xenon.Domain.Models
+@model ApplicationUser
+@{
+    Layout = "_ProfileLayout";
+    ViewData["Title"] = "Обзор";
+
+    var recentOrders = ViewBag.RecentOrders as List<Order> ?? new List<Order>();
+    var totalOrders = (int)ViewBag.TotalOrders;
+    var totalSpent = (decimal)ViewBag.TotalSpent;
+}
+
+<h4 class="mb-4"><i class="fas fa-home me-2"></i> Обзор</h4>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Заказов</h6>
+                        <h2>@totalOrders</h2>
+                    </div>
+                    <i class="fas fa-shopping-bag fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Потрачено</h6>
+                        <h2>@totalSpent.ToString("N0") ₽</h2>
+                    </div>
+                    <i class="fas fa-wallet fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">С нами с</h6>
+                        <h2>@Model.CreatedAt.ToString("dd.MM.yyyy")</h2>
+                    </div>
+                    <i class="fas fa-calendar fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (recentOrders.Count > 0)
+{
+    <h5 class="mb-3">Последние заказы</h5>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Дата</th>
+                    <th>Сумма</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in recentOrders)
+                {
+                    <tr>
+                        <td>#@order.OrderID</td>
+                        <td>@order.OrderDate.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@order.TotalAmount.ToString("N2") ₽</td>
+                        <td>
+                            @if (order.Shipped)
+                            {
+                                <span class="badge bg-success">Доставлен</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">В обработке</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="text-center py-5">
+        <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">Заказов пока нет</h5>
+        <a href="/" class="btn btn-primary mt-2"><i class="fas fa-shopping-cart me-1"></i> Перейти в магазин</a>
+    </div>
+}

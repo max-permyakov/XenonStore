@@ -14,6 +14,10 @@ namespace Xenon.Web.Models.ViewModels
 
         public decimal Total => Subtotal + ShippingCost;
 
+        public bool IsAuthenticated { get; set; }
+
+        public ApplicationUser? UserProfile { get; set; }
+
         public IReadOnlyList<DeliveryOption> DeliveryOptions
             => OrderCheckoutOptions.DeliveryOptions;
 

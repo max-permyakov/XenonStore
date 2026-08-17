@@ -1,0 +1,79 @@
+@page
+@model Xenon.Web.Pages.Admin.Suppliers.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Suppliers";
+}
+
+<div class="page-header">
+    <h4><i class="fas fa-truck me-2"></i>Suppliers</h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card bg-dark border-secondary">
+            <div class="card-body p-0">
+                <table class="table table-admin table-dark mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width:80px">ID</th>
+                            <th>Name</th>
+                            <th>City</th>
+                            <th>Products</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Suppliers.Count == 0)
+                        {
+                            <tr><td colspan="5" class="text-center text-muted py-3">No suppliers</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var s in Model.Suppliers)
+                            {
+                                <tr>
+                                    <td>@s.SupplierId</td>
+                                    <td>@s.Name</td>
+                                    <td>@s.City</td>
+                                    <td class="text-muted">@(s.Products?.Count() ?? 0)</td>
+                                    <td class="text-end">
+                                        <form method="post" asp-page-handler="Delete" class="d-inline">
+                                            <input type="hidden" name="id" value="@s.SupplierId" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm-icon"
+                                                    onclick="return confirm('Delete supplier @s.Name?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header border-secondary">
+                <i class="fas fa-plus me-1"></i>Add Supplier
+            </div>
+            <div class="card-body form-admin">
+                <form method="post" asp-page-handler="Create">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input name="name" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">City</label>
+                        <input name="city" class="form-control" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Create
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

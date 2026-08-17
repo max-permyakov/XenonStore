@@ -76,5 +76,8 @@ namespace Xenon.Domain.Models
         public string? Comment { get; set; }
 
         public bool Shipped { get; set; }
+
+        public string? UserId { get; set; }
+        public ApplicationUser? User { get; set; }
     }
 }

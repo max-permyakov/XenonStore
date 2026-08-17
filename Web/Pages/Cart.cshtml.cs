@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Xenon.Domain.Interfaces.Services;
@@ -24,92 +25,83 @@ namespace Xenon.Web.Pages
             _httpContextAccessor = httpContextAccessor;
         }
 
-        // Свойства для представления
         public Cart Cart { get; set; } = new Cart();
         public string ReturnUrl { get; set; } = "/";
 
-        // ID корзины из сессии
-        private string CartId => _httpContextAccessor.HttpContext?.Session?.Id
-            ?? Guid.NewGuid().ToString();
+        private string GetCartId()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!string.IsNullOrEmpty(userId))
+                    return userId;
+            }
+            return _httpContextAccessor.HttpContext?.Session?.Id ?? Guid.NewGuid().ToString();
+        }
 
-        // GET: отображение корзины
         public async Task OnGet(string returnUrl)
         {
             ReturnUrl = returnUrl ?? "/";
-            Cart = await _cartService.GetCartAsync(CartId);
-            _logger.LogDebug("Cart loaded with {Count} items", Cart.Lines.Count());
+            Cart = await _cartService.GetCartAsync(GetCartId());
         }
 
-        // Добавление товара (обычный POST)
         public async Task<IActionResult> OnPost(long productId, string returnUrl)
         {
             try
             {
-                await _cartService.AddItemAsync(CartId, productId, 1);
-                _logger.LogInformation("Product {ProductId} added to cart", productId);
+                await _cartService.AddItemAsync(GetCartId(), productId, 1);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to add product {ProductId} to cart", productId);
-                // Можно добавить сообщение об ошибке в TempData
             }
 
             return RedirectToPage(new { returnUrl = returnUrl });
         }
 
-        // Добавление одного товара (из списка товаров)
         public async Task<IActionResult> OnPostAddOneAsync(long productId, string returnUrl)
         {
-            await _cartService.AddItemAsync(CartId, productId, 1);
-            var cart = await _cartService.GetCartAsync(CartId);
+            await _cartService.AddItemAsync(GetCartId(), productId, 1);
+            var cart = await _cartService.GetCartAsync(GetCartId());
             int quantity = cart.Lines
                 .FirstOrDefault(l => l.Product.ProductID == productId)?.Quantity ?? 0;
 
-            // Если запрос AJAX, возвращаем JSON
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
                 return new JsonResult(new { quantity });
-            }
 
             return LocalRedirect(returnUrl);
         }
 
         public async Task<IActionResult> OnPostRemoveOneAsync(long productId, string returnUrl)
         {
-            await _cartService.DeacreaseItemAsync(CartId, productId);
-            var cart = await _cartService.GetCartAsync(CartId);
+            await _cartService.DeacreaseItemAsync(GetCartId(), productId);
+            var cart = await _cartService.GetCartAsync(GetCartId());
             int quantity = cart.Lines
                 .FirstOrDefault(l => l.Product.ProductID == productId)?.Quantity ?? 0;
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
                 return new JsonResult(new { quantity });
-            }
 
             return LocalRedirect(returnUrl);
         }
-
 
         public async Task<IActionResult> OnPostRemove(long productId, string returnUrl)
         {
             try
             {
-                await _cartService.RemoveItemAsync(CartId, productId);
-                _logger.LogInformation("Product {ProductId} removed from cart", productId);
+                await _cartService.RemoveItemAsync(GetCartId(), productId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to remove product {ProductId}", productId);
+                _logger.LogError(ex, "Failed to remove product {ProductId} from cart", productId);
             }
 
             return RedirectToPage(new { returnUrl = returnUrl });
         }
 
-        // Очистка корзины
         public async Task<IActionResult> OnPostClear()
         {
-            await _cartService.ClearCartAsync(CartId);
-            _logger.LogInformation("Cart cleared");
+            await _cartService.ClearCartAsync(GetCartId());
             return RedirectToPage();
         }
     }

@@ -96,6 +96,16 @@ namespace Xenon.Infrastructure.Data.Configurations
             builder.HasIndex(o => o.PaymentMethod);
             builder.HasIndex(o => o.PaymentStatus);
             builder.HasIndex(o => o.Shipped);
+
+            builder.Property(o => o.UserId)
+                .HasMaxLength(450);
+
+            builder.HasOne(o => o.User)
+                .WithMany()
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasIndex(o => o.UserId);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using Xenon.Domain.Entities;
 using Xenon.Domain.Interfaces.Services;
 using Xenon.Domain.Models;
@@ -34,8 +35,16 @@ namespace Xenon.Web.Controllers
             _logger = logger;
         }
 
-        private string CartId => _httpContextAccessor.HttpContext?.Session?.Id
-            ?? Guid.NewGuid().ToString();
+        private string GetCartId()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!string.IsNullOrEmpty(userId))
+                    return userId;
+            }
+            return _httpContextAccessor.HttpContext?.Session?.Id ?? Guid.NewGuid().ToString();
+        }
 
         public async Task<IActionResult> Index(string category, string searchTerm, int page = 1)
         {
@@ -100,7 +109,7 @@ namespace Xenon.Web.Controllers
 
         private async Task<List<ProductCartViewModel>> BuildProductViewModelsAsync(IEnumerable<Product> products)
         {
-            var cart = await _cartService.GetCartAsync(CartId);
+            var cart = await _cartService.GetCartAsync(GetCartId());
             var owner = FavoriteOwner.Resolve(User, _httpContextAccessor.HttpContext);
             var favoriteIds = await _favoriteService.GetFavoriteProductIdsAsync(owner.UserId, owner.SessionId);
             var favoriteSet = favoriteIds.ToHashSet();

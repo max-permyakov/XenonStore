@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using Xenon.Domain.Interfaces;
 using Xenon.Domain.Interfaces.Services;
 using Xenon.Domain.Models;
@@ -21,13 +22,20 @@ namespace Xenon.Web.Components
             _httpContextAccessor = httpContextAccessor;
         }
 
-        private string CartId => _httpContextAccessor.HttpContext?.Session?.Id
-            ?? Guid.NewGuid().ToString();
+        private string GetCartId()
+        {
+            if (HttpContext.User.Identity?.IsAuthenticated == true)
+            {
+                var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!string.IsNullOrEmpty(userId))
+                    return userId;
+            }
+            return _httpContextAccessor.HttpContext?.Session?.Id ?? Guid.NewGuid().ToString();
+        }
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            // Если нужны данные для меню + корзина
-            var cart = await _cartService.GetCartAsync(CartId);
+            var cart = await _cartService.GetCartAsync(GetCartId());
             ViewBag.CartItemsCount = cart.Lines.Sum(l => l.Quantity);
 
             var categories = _repository.Products

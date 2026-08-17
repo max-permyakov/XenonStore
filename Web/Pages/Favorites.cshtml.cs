@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Xenon.Domain.Interfaces.Services;
@@ -29,15 +30,23 @@ namespace Xenon.Web.Pages
         private (string? UserId, string? SessionId) Owner =>
             FavoriteOwner.Resolve(HttpContext.User, HttpContext);
 
-        private string CartId => _httpContextAccessor.HttpContext?.Session?.Id
-            ?? Guid.NewGuid().ToString();
+        private string GetCartId()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!string.IsNullOrEmpty(userId))
+                    return userId;
+            }
+            return _httpContextAccessor.HttpContext?.Session?.Id ?? Guid.NewGuid().ToString();
+        }
 
         public async Task OnGet(string returnUrl)
         {
             ReturnUrl = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
 
             var products = await _favoriteService.GetFavoriteProductsAsync(Owner.UserId, Owner.SessionId);
-            var cart = await _cartService.GetCartAsync(CartId);
+            var cart = await _cartService.GetCartAsync(GetCartId());
 
             Items = products
                 .Select(p => new ProductCartViewModel

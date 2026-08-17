@@ -16,6 +16,9 @@ namespace Xenon.Infrastructure.Data
         public DbSet<Category> Categories => Set<Category>();
         public DbSet<Supplier> Suppliers => Set<Supplier>();
         public DbSet<Favorite> Favorites => Set<Favorite>();
+        public DbSet<UserCart> UserCarts => Set<UserCart>();
+        public DbSet<LogEntry> LogEntries => Set<LogEntry>();
+        public DbSet<Notification> Notifications => Set<Notification>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

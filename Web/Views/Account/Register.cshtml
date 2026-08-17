@@ -1,0 +1,143 @@
+@using Xenon.Web.Models.ViewModels.Login
+@model RegisterModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xenon — Регистрация</title>
+    <link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/lib/font-awesome/css/all.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-card {
+            background: #16213e;
+            border: 1px solid #0f3460;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .auth-header {
+            background: linear-gradient(135deg, #0f3460, #533483);
+            border-radius: 16px 16px 0 0;
+            padding: 2rem;
+            text-align: center;
+        }
+        .auth-header i { font-size: 3rem; color: #e94560; }
+        .form-control {
+            background-color: #1a1a2e;
+            border-color: #0f3460;
+            color: #eee;
+        }
+        .form-control:focus {
+            background-color: #1a1a2e;
+            border-color: #533483;
+            color: #eee;
+            box-shadow: 0 0 0 0.2rem rgba(83, 52, 131, 0.25);
+        }
+        .form-label { color: #aaa; }
+        .btn-auth {
+            background: linear-gradient(135deg, #e94560, #533483);
+            border: none;
+            padding: 0.6rem 2rem;
+            font-weight: 600;
+        }
+        .btn-auth:hover { opacity: 0.9; transform: translateY(-1px); }
+        .auth-link { color: #e94560; text-decoration: none; }
+        .auth-link:hover { text-decoration: underline; color: #ff6b81; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <i class="fas fa-user-plus"></i>
+                        <h3 class="text-white mt-2 mb-0">Xenon</h3>
+                        <small class="text-white-50">Создание аккаунта</small>
+                    </div>
+                    <div class="p-4">
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                        <form asp-action="Register" asp-controller="Account" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label asp-for="FirstName" class="form-label"></label>
+                                    <input asp-for="FirstName" class="form-control" placeholder="Иван" autofocus />
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="LastName" class="form-label"></label>
+                                    <input asp-for="LastName" class="form-control" placeholder="Иванов" />
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary"><i class="fas fa-envelope text-muted"></i></span>
+                                    <input asp-for="Email" class="form-control" placeholder="you@example.com" />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Phone" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary"><i class="fas fa-phone text-muted"></i></span>
+                                    <input asp-for="Phone" class="form-control" placeholder="+7 (999) 123-45-67" />
+                                </div>
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary"><i class="fas fa-lock text-muted"></i></span>
+                                    <input asp-for="Password" class="form-control" placeholder="Минимум 6 символов" />
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="ConfirmPassword" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary"><i class="fas fa-lock text-muted"></i></span>
+                                    <input asp-for="ConfirmPassword" class="form-control" placeholder="Повторите пароль" />
+                                </div>
+                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-auth btn-primary w-100 mb-3">
+                                <i class="fas fa-user-plus me-1"></i> Зарегистрироваться
+                            </button>
+                        </form>
+
+                        <div class="text-center">
+                            <span class="text-muted">Уже есть аккаунт?</span>
+                            <a asp-action="Login" asp-controller="Account" class="auth-link ms-1">Войти</a>
+                        </div>
+                        <div class="text-center mt-2">
+                            <a href="/" class="text-muted small"><i class="fas fa-arrow-left me-1"></i> На главную</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

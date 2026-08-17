@@ -1,0 +1,65 @@
+@page
+@model Xenon.Web.Pages.Admin.Products.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Products";
+}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h4 class="mb-0"><i class="fas fa-box me-2"></i>Products</h4>
+    <a asp-page="Create" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i>Create
+    </a>
+</div>
+
+<div class="card bg-dark border-secondary">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-admin table-dark mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Supplier</th>
+                        <th>Popularity</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Products.Count == 0)
+                    {
+                        <tr><td colspan="7" class="text-center text-muted py-3">No products found</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var p in Model.Products)
+                        {
+                            <tr>
+                                <td>@p.ProductID</td>
+                                <td>@p.Name</td>
+                                <td>@p.Category?.Name</td>
+                                <td>@p.Price.ToString("N2") @p.Currency</td>
+                                <td>@p.Supplier?.Name</td>
+                                <td>@p.Popularity</td>
+                                <td class="text-end">
+                                    <a asp-page="Edit" asp-route-id="@p.ProductID" class="btn btn-outline-info btn-sm-icon me-1">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post" asp-page-handler="Delete" class="d-inline">
+                                        <input type="hidden" name="id" value="@p.ProductID" />
+                                        <button type="submit" class="btn btn-outline-danger btn-sm-icon"
+                                                onclick="return confirm('Delete this product?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -14,8 +14,12 @@ using Xenon.Infrastructure.Services;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
-    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning) // Скрыть Info/Debug логи EF Core
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning)
     .WriteTo.Console()
+    .WriteTo.File("Logs/xenon-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30,
+        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
     .CreateLogger();
 
 
@@ -27,10 +31,10 @@ try
     builder.Services.AddSerilog();
     builder.Services.Configure<CookiePolicyOptions>(options =>
     {
-        options.CheckConsentNeeded = context => true;
+        options.CheckConsentNeeded = context => false;
     });
     builder.Services.AddControllersWithViews();
-  
+
     builder.Services.Configure<SessionOptions>(options =>
     {
         options.Cookie.Name = ".XenenStore.Session";
@@ -40,8 +44,6 @@ try
     {
         opts.UseSqlServer(
             builder.Configuration["ConnectionStrings:SportsStoreConnection"]);
-      
-
     });
     builder.Services.AddDistributedSqlServerCache(opts =>
     {
@@ -51,17 +53,20 @@ try
         opts.TableName = "DataCache";
     });
     builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(@"C:\Users\maksi\Documents\ScriptsOrUtilites\ProjectsC#\XenonStore\Web\App_Data\keys\")) 
+    .PersistKeysToFileSystem(new DirectoryInfo(@"C:\Users\maksi\Documents\ScriptsOrUtilites\ProjectsC#\XenonStore\Web\App_Data\keys\"))
     .SetApplicationName("XenonStore");
     builder.Services.AddDbContext<AppIdentityDbContext>(options =>
         options.UseSqlServer(
             builder.Configuration["ConnectionStrings:IdentityConnection"]));
-    builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-        .AddEntityFrameworkStores<AppIdentityDbContext>();
-    //builder.Services.Configure<HostFilteringOptions>(opts => {
-    //    opts.AllowedHosts.Clear();
-    //    opts.AllowedHosts.Add("*.example.com");
-    //});
+    builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+        .AddEntityFrameworkStores<AppIdentityDbContext>()
+        .AddDefaultTokenProviders();
+    builder.Services.ConfigureApplicationCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+    });
     builder.Services.AddHsts(opts =>
     {
         opts.MaxAge = TimeSpan.FromDays(1);
@@ -74,11 +79,12 @@ try
     builder.Services.AddScoped<IProductService, ProductService>();
     builder.Services.AddScoped<ICartService, CartService>();
     builder.Services.AddScoped<ICartStorage, SessionCartStorage>();
+    builder.Services.AddScoped<EFUserCartStorage>();
     builder.Services.AddScoped<IFavoriteService, FavoriteService>();
     builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
     builder.Services.AddScoped<IOrderRepository, EFOrderRepository>();
     builder.Services.AddScoped<ProductImportService>();
-    builder.Services.AddServerSideBlazor();
+    builder.Services.AddScoped<ILoggingService, LoggingService>();
     builder.Services.AddAntiforgery(options =>
     {
         options.Cookie.Name = "XSRF-TOKEN";
@@ -96,20 +102,6 @@ try
     app.UseHttpsRedirection();
     app.UseCookiePolicy();
     app.UseCors();
-    var piplineConfig = app.Configuration;
-    app.MapGet("config", async (HttpContext context, IConfiguration config) =>
-    {
-        string defaultDebug = config["Logging:LogLevel:Default"];
-        await context.Response.WriteAsync($"The config is:{defaultDebug}");
-        string environ = config["ASPNETCORE_ENVIRONMENT"];
-        await context.Response.WriteAsync($"\nThe env setting is: {environ}");
-        string wsID = config["WebService:Id"];
-        string wsKey = config["WebService:Key"];
-        await context.Response.WriteAsync($"\nThe secret ID is: {wsID}");
-        await context.Response.WriteAsync($"\nThe secret Key is: {wsKey}");
-        var conn = config["ConnectionStrings:SportsStoreConnection"];
-        await context.Response.WriteAsync($"Connection: {conn ?? "NULL"}");
-    });
 
     if (app.Environment.IsDevelopment())
     {
@@ -132,9 +124,6 @@ try
     app.UseAuthorization();
     app.MapControllers();
     app.MapRazorPages();
-    app.MapBlazorHub();
-    //app.MapFallbackToPage("/{*catchall}", "/error");
-    //app.MapFallbackToPage("/admin/{*catchall}", "/Admin/Index");
     SeedData.EnsurePopulated(app);
     IdentitySeedData.EnsurePopulated(app);
 

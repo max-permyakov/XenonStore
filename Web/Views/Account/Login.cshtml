@@ -4,34 +4,115 @@
     Layout = null;
 }
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <meta name="viewport" content="width=device-width" />
-    <title>SportsStore</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xenon — Вход</title>
     <link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/lib/font-awesome/css/all.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-card {
+            background: #16213e;
+            border: 1px solid #0f3460;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .auth-header {
+            background: linear-gradient(135deg, #0f3460, #533483);
+            border-radius: 16px 16px 0 0;
+            padding: 2rem;
+            text-align: center;
+        }
+        .auth-header i { font-size: 3rem; color: #e94560; }
+        .form-control, .form-check-input {
+            background-color: #1a1a2e;
+            border-color: #0f3460;
+            color: #eee;
+        }
+        .form-control:focus {
+            background-color: #1a1a2e;
+            border-color: #533483;
+            color: #eee;
+            box-shadow: 0 0 0 0.2rem rgba(83, 52, 131, 0.25);
+        }
+        .form-label { color: #aaa; }
+        .btn-auth {
+            background: linear-gradient(135deg, #e94560, #533483);
+            border: none;
+            padding: 0.6rem 2rem;
+            font-weight: 600;
+        }
+        .btn-auth:hover { opacity: 0.9; transform: translateY(-1px); }
+        .auth-link { color: #e94560; text-decoration: none; }
+        .auth-link:hover { text-decoration: underline; color: #ff6b81; }
+    </style>
 </head>
 <body>
-    <div class="bg-dark text-white p-2">
-        <span class="navbar-brand ml-2">SPORTS STORE</span>
-    </div>
-    <div class="m-1 p-1">
-        <div class="text-danger" asp-validation-summary="All"></div>
-        <form asp-action="Login" asp-controller="Account" method="post">
-            @Html.AntiForgeryToken()
-            <input type="hidden" asp-for="ReturnUrl" />
-         
-            <div class="form-group">
-                <label asp-for="Name"></label>
-                <div asp-validation-for="Name" class="text-danger"></div>
-                <input asp-for="Name" class="form-control" />
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <i class="fas fa-bolt"></i>
+                        <h3 class="text-white mt-2 mb-0">Xenon</h3>
+                        <small class="text-white-50">Вход в аккаунт</small>
+                    </div>
+                    <div class="p-4">
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                        <form asp-action="Login" asp-controller="Account" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" asp-for="ReturnUrl" />
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary"><i class="fas fa-envelope text-muted"></i></span>
+                                    <input asp-for="Email" class="form-control" placeholder="you@example.com" autofocus />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary"><i class="fas fa-lock text-muted"></i></span>
+                                    <input asp-for="Password" class="form-control" placeholder="Введите пароль" />
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <input asp-for="RememberMe" class="form-check-input" />
+                                <label asp-for="RememberMe" class="form-check-label"></label>
+                            </div>
+
+                            <button type="submit" class="btn btn-auth btn-primary w-100 mb-3">
+                                <i class="fas fa-sign-in-alt me-1"></i> Войти
+                            </button>
+                        </form>
+
+                        <div class="text-center">
+                            <span class="text-muted">Нет аккаунта?</span>
+                            <a asp-action="Register" asp-controller="Account" class="auth-link ms-1">Зарегистрироваться</a>
+                        </div>
+                        <div class="text-center mt-2">
+                            <a href="/" class="text-muted small"><i class="fas fa-arrow-left me-1"></i> На главную</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Password"></label>
-                <div asp-validation-for="Password" class="text-danger"></div>
-                <input asp-for="Password" type="password" class="form-control" />
-            </div>
-            <button class="btn btn-primary mt-2" type="submit">Log In</button>
-        </form>
+        </div>
     </div>
+
+    <script src="/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
 </body>
 </html>

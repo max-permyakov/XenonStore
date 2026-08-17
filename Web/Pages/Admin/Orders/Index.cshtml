@@ -1,0 +1,80 @@
+@page
+@model Xenon.Web.Pages.Admin.Orders.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Orders";
+}
+
+<div class="page-header">
+    <h4><i class="fas fa-shopping-cart me-2"></i>Orders</h4>
+</div>
+
+<div class="card bg-dark border-secondary">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-admin table-dark mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Email</th>
+                        <th>Total</th>
+                        <th>Payment</th>
+                        <th>Shipped</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Orders.Count == 0)
+                    {
+                        <tr><td colspan="8" class="text-center text-muted py-3">No orders found</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var o in Model.Orders)
+                        {
+                            <tr>
+                                <td>@o.OrderID</td>
+                                <td>@o.OrderDate.ToString("dd.MM.yyyy HH:mm")</td>
+                                <td>@o.Name</td>
+                                <td>@o.Email</td>
+                                <td>@o.TotalAmount.ToString("N2")</td>
+                                <td>
+                                    @switch (o.PaymentStatus)
+                                    {
+                                        case PaymentStatus.Paid:
+                                            <span class="badge bg-success">Paid</span>
+                                            break;
+                                        case PaymentStatus.Failed:
+                                            <span class="badge bg-danger">Failed</span>
+                                            break;
+                                        case PaymentStatus.Refunded:
+                                            <span class="badge bg-warning text-dark">Refunded</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">Pending</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <form method="post" asp-page-handler="ToggleShip" class="d-inline">
+                                        <input type="hidden" name="id" value="@o.OrderID" />
+                                        <button type="submit" class="btn btn-sm @(o.Shipped ? "btn-outline-warning" : "btn-outline-success")">
+                                            @(o.Shipped ? "Unship" : "Ship")
+                                        </button>
+                                    </form>
+                                </td>
+                                <td class="text-end">
+                                    <span class="text-muted small">
+                                        @o.Lines.Count item(s)
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
