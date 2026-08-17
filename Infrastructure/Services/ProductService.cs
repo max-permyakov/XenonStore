@@ -1,4 +1,5 @@
-﻿using Xenon.Domain.Models;
+﻿using Xenon.Domain.Entities;
+using Xenon.Domain.Models;
 
 public class ProductService : IProductService
 {

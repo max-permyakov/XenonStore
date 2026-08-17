@@ -1,4 +1,4 @@
-namespace Xenon.Domain.Models
+namespace Xenon.Domain.Entities
 {
     public enum ProductSortBy
     {

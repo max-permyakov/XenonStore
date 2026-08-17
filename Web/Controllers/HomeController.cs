@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Xenon.Domain.Entities;
 using Xenon.Domain.Interfaces.Services;
 using Xenon.Domain.Models;
 using Xenon.Web.Models;

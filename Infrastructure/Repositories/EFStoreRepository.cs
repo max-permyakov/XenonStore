@@ -2,6 +2,7 @@
 using Xenon.Domain.Models;
 using Xenon.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Xenon.Domain.Entities;
 namespace Xenon.Infrastructure.Repositories
 {
     public class EFStoreRepository : IStoreRepository

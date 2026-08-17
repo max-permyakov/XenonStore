@@ -13,8 +13,11 @@ using Xenon.Infrastructure.Services;
 
 
 Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning) // Скрыть Info/Debug логи EF Core
     .WriteTo.Console()
     .CreateLogger();
+
 
 try
 {

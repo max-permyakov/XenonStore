@@ -1,4 +1,5 @@
 ﻿// Xenon.Domain/Interfaces/IStoreRepository.cs
+using Xenon.Domain.Entities;
 using Xenon.Domain.Models;
 
 public interface IStoreRepository
