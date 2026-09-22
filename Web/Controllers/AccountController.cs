@@ -16,6 +16,7 @@ namespace Xenon.Web.Controllers
         private readonly ILogger<AccountController> _logger;
         private readonly ILoggingService _loggingService;
         private readonly ICartService _cartService;
+        private readonly IRecentlyViewedService _recentlyViewedService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AccountController(
@@ -24,6 +25,7 @@ namespace Xenon.Web.Controllers
             ILogger<AccountController> logger,
             ILoggingService loggingService,
             ICartService cartService,
+            IRecentlyViewedService recentlyViewedService,
             IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
@@ -31,6 +33,7 @@ namespace Xenon.Web.Controllers
             _logger = logger;
             _loggingService = loggingService;
             _cartService = cartService;
+            _recentlyViewedService = recentlyViewedService;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -78,6 +81,16 @@ namespace Xenon.Web.Controllers
                     catch (Exception ex)
                     {
                         _logger.LogWarning(ex, "Failed to migrate session cart for user {UserId}", user.Id);
+                    }
+
+                    try
+                    {
+                        var guestId = HttpContext.Request.Cookies["Xenon.FavoritesGuest"];
+                        await _recentlyViewedService.MergeGuestToUserAsync(guestId, user.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to merge recently viewed for user {UserId}", user.Id);
                     }
 
                     if (await _userManager.IsInRoleAsync(user, "Admin") || await _userManager.IsInRoleAsync(user, "Supplier"))
@@ -142,6 +155,16 @@ namespace Xenon.Web.Controllers
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Failed to migrate session cart after registration for {UserId}", user.Id);
+                }
+
+                try
+                {
+                    var guestId = HttpContext.Request.Cookies["Xenon.FavoritesGuest"];
+                    await _recentlyViewedService.MergeGuestToUserAsync(guestId, user.Id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to merge recently viewed after registration for {UserId}", user.Id);
                 }
 
                 await _loggingService.LogInfoAsync("Auth",

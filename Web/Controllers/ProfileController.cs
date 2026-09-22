@@ -9,12 +9,14 @@ using Xenon.Domain.Models;
 namespace Xenon.Web.Controllers
 {
     [Authorize]
+    [Route("Profile/[action]")]
     public class ProfileController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILoggingService _loggingService;
         private readonly IOrderRepository _orderRepository;
+        private readonly IRecentlyViewedService _recentlyViewedService;
         private readonly ILogger<ProfileController> _logger;
 
         public ProfileController(
@@ -22,12 +24,14 @@ namespace Xenon.Web.Controllers
             SignInManager<ApplicationUser> signInManager,
             ILoggingService loggingService,
             IOrderRepository orderRepository,
+            IRecentlyViewedService recentlyViewedService,
             ILogger<ProfileController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _loggingService = loggingService;
             _orderRepository = orderRepository;
+            _recentlyViewedService = recentlyViewedService;
             _logger = logger;
         }
 
@@ -41,10 +45,13 @@ namespace Xenon.Web.Controllers
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.OrderDate)
                 .ToList();
+            var recentViews = await _recentlyViewedService
+                .GetRecentlyViewedAsync(user.Id, null, count: 6);
 
             ViewBag.RecentOrders = orders.Take(5).ToList();
             ViewBag.TotalOrders = orders.Count;
             ViewBag.TotalSpent = orders.Sum(o => o.TotalAmount);
+            ViewBag.RecentViews = recentViews;
 
             return View(user);
         }
@@ -138,6 +145,16 @@ namespace Xenon.Web.Controllers
                 .ToList();
 
             return View(orders);
+        }
+
+        public async Task<IActionResult> RecentViews()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound();
+
+            var products = await _recentlyViewedService
+                .GetRecentlyViewedAsync(user.Id, null, count: 20);
+            return View(products);
         }
 
         [HttpPost]

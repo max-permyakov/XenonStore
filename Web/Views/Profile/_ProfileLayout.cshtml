@@ -27,6 +27,9 @@
             <a asp-action="Orders" class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["action"]?.ToString() == "Orders" ? "active" : "")">
                 <i class="fas fa-shopping-bag me-2"></i> Мои заказы
             </a>
+            <a asp-action="RecentViews" class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["action"]?.ToString() == "RecentViews" ? "active" : "")">
+                <i class="fas fa-clock me-2"></i> Недавно просмотренные
+            </a>
             <a asp-action="Settings" class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["action"]?.ToString() == "Settings" ? "active" : "")">
                 <i class="fas fa-cog me-2"></i> Настройки
             </a>

@@ -5,6 +5,7 @@
     ViewData["Title"] = "Обзор";
 
     var recentOrders = ViewBag.RecentOrders as List<Order> ?? new List<Order>();
+    var recentViews = ViewBag.RecentViews as List<Product> ?? new List<Product>();
     var totalOrders = (int)ViewBag.TotalOrders;
     var totalSpent = (decimal)ViewBag.TotalSpent;
 }
@@ -95,5 +96,29 @@ else
         <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
         <h5 class="text-muted">Заказов пока нет</h5>
         <a href="/" class="btn btn-primary mt-2"><i class="fas fa-shopping-cart me-1"></i> Перейти в магазин</a>
+    </div>
+}
+
+@if (recentViews.Count > 0)
+{
+    <h5 class="mb-3 mt-4">Недавно просмотренные</h5>
+    <div class="row">
+        @foreach (var product in recentViews)
+        {
+            <div class="col-sm-6 col-md-4 mb-3">
+                <div class="card h-100 shadow-sm">
+                    <img src="@(string.IsNullOrEmpty(product.ImageUrl) ? "/images/placeholder.jpg" : product.ImageUrl)"
+                         class="card-img-top" style="height: 120px; object-fit: cover;"
+                         alt="@product.Name" />
+                    <div class="card-body d-flex flex-column py-2">
+                        <h6 class="card-title mb-1">@product.Name</h6>
+                        <span class="text-primary fw-bold">@product.Price.ToString("c")</span>
+                        <a asp-action="RecentViews" class="btn btn-sm btn-outline-primary mt-2">
+                            Посмотреть все
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 }

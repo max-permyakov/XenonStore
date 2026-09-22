@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Xenon.Domain.Interfaces.Services;
 using Xenon.Domain.Models;
+using Xenon.Web.Models;
 
 namespace Xenon.Web.Pages
 {
@@ -11,17 +12,20 @@ namespace Xenon.Web.Pages
         private readonly ILogger<CartModel> _logger;
         private readonly IProductService _productService;
         private readonly ICartService _cartService;
+        private readonly IRecentlyViewedService _recentlyViewedService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public CartModel(
             ILogger<CartModel> logger,
             IProductService productService,
             ICartService cartService,
+            IRecentlyViewedService recentlyViewedService,
             IHttpContextAccessor httpContextAccessor)
         {
             _logger = logger;
             _productService = productService;
             _cartService = cartService;
+            _recentlyViewedService = recentlyViewedService;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -37,6 +41,18 @@ namespace Xenon.Web.Pages
                     return userId;
             }
             return _httpContextAccessor.HttpContext?.Session?.Id ?? Guid.NewGuid().ToString();
+        }
+
+        private async Task RecordViewAsync(long productId, (string? UserId, string? SessionId) owner)
+        {
+            try
+            {
+                await _recentlyViewedService.RecordViewAsync(productId, owner.UserId, owner.SessionId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to record recently viewed product {ProductId}", productId);
+            }
         }
 
         public async Task OnGet(string returnUrl)
@@ -65,6 +81,9 @@ namespace Xenon.Web.Pages
             var cart = await _cartService.GetCartAsync(GetCartId());
             int quantity = cart.Lines
                 .FirstOrDefault(l => l.Product.ProductID == productId)?.Quantity ?? 0;
+
+            var owner = FavoriteOwner.Resolve(User, _httpContextAccessor.HttpContext);
+            await RecordViewAsync(productId, owner);
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 return new JsonResult(new { quantity });

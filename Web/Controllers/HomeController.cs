@@ -57,7 +57,8 @@ namespace Xenon.Web.Controllers
             var products = await _productService.GetProductsAsync(page, pageSize, filter);
             var total = await _productService.GetTotalCountAsync(filter);
 
-            var productsWithQuantity = await BuildProductViewModelsAsync(products);
+            var owner = FavoriteOwner.Resolve(User, _httpContextAccessor.HttpContext);
+            var productsWithQuantity = await BuildProductViewModelsAsync(products, owner);
 
             var viewModel = new ProductsListWithCartViewModel
             {
@@ -86,7 +87,8 @@ namespace Xenon.Web.Controllers
 
             var products = await _productService.GetProductsAsync(page, pageSize, filter);
 
-            var productsWithQuantity = await BuildProductViewModelsAsync(products);
+            var owner = FavoriteOwner.Resolve(User, _httpContextAccessor.HttpContext);
+            var productsWithQuantity = await BuildProductViewModelsAsync(products, owner);
 
             return PartialView("_ProductGridItems", productsWithQuantity);
         }
@@ -100,17 +102,18 @@ namespace Xenon.Web.Controllers
                 return NotFound();
             }
 
-            var items = await BuildProductViewModelsAsync(new[] { product });
+            var owner = FavoriteOwner.Resolve(User, _httpContextAccessor.HttpContext);
+            var items = await BuildProductViewModelsAsync(new[] { product }, owner);
             var item = items[0];
 
             ViewData["CartReturnUrl"] = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
             return PartialView("_ProductGridItems", items);
         }
 
-        private async Task<List<ProductCartViewModel>> BuildProductViewModelsAsync(IEnumerable<Product> products)
+        private async Task<List<ProductCartViewModel>> BuildProductViewModelsAsync(
+            IEnumerable<Product> products, (string? UserId, string? SessionId) owner)
         {
             var cart = await _cartService.GetCartAsync(GetCartId());
-            var owner = FavoriteOwner.Resolve(User, _httpContextAccessor.HttpContext);
             var favoriteIds = await _favoriteService.GetFavoriteProductIdsAsync(owner.UserId, owner.SessionId);
             var favoriteSet = favoriteIds.ToHashSet();
 

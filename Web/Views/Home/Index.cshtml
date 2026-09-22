@@ -14,20 +14,6 @@
             <form method="get" asp-action="Index" id="filterForm">
                 <div class="d-flex flex-wrap align-items-start gap-2">
                     @await Component.InvokeAsync("ProductFilters")
-                    <div class="d-flex flex-grow-1" style="min-width: 260px;">
-                        <input type="text"
-                               name="searchTerm"
-                               class="form-control me-2"
-                               placeholder="Search products..."
-                               value="@Model?.SearchTerm" />
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-search"></i> Search
-                        </button>
-                        @if (!string.IsNullOrEmpty(Model?.SearchTerm?.ToString()))
-                        {
-                            <a asp-action="Index" class="btn btn-outline-secondary ms-2">Clear</a>
-                        }
-                    </div>
                 </div>
             </form>
         </div>

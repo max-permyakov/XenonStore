@@ -16,6 +16,7 @@ namespace Xenon.Infrastructure.Data
         public DbSet<Category> Categories => Set<Category>();
         public DbSet<Supplier> Suppliers => Set<Supplier>();
         public DbSet<Favorite> Favorites => Set<Favorite>();
+        public DbSet<RecentlyViewed> RecentlyViewedProducts => Set<RecentlyViewed>();
         public DbSet<UserCart> UserCarts => Set<UserCart>();
         public DbSet<LogEntry> LogEntries => Set<LogEntry>();
         public DbSet<Notification> Notifications => Set<Notification>();
