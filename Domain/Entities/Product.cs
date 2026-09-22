@@ -21,13 +21,13 @@ namespace Xenon.Domain.Models
 
         [Required(ErrorMessage = "Supplier is required")]
         public long SupplierId { get; set; }
-        public decimal? Discount { get; set; }  // Скидка в процентах (0.1 = 10%)
-        public double? Rating { get; set; }     // Рейтинг (например, 4.5)
-        public string? Currency { get; set; }   // Валюта (USD, EUR и т.д.)
-        public string? Features { get; set; }   // Особенности (может быть длинный текст)
-        public string? ImageUrl { get; set; }   // Ссылка на изображение (добавим позже)
-        public int Popularity { get; set; }     // Популярность (счётчик продаж/просмотров)
-        // Навигационные свойства
+        public decimal? Discount { get; set; }  
+        public double? Rating { get; set; }     
+        public string? Currency { get; set; }   
+        public string? Features { get; set; }  
+        public string? ImageUrl { get; set; }   
+        public int Popularity { get; set; }    
+     
         public Category? Category { get; set; }
         public Supplier? Supplier { get; set; }
     }

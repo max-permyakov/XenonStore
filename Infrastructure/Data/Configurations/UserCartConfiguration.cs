@@ -9,16 +9,6 @@ namespace Xenon.Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<UserCart> builder)
         {
             builder.HasKey(uc => uc.UserId);
-
-            builder.HasOne(uc => uc.User)
-                .WithOne()
-                .HasForeignKey<UserCart>(uc => uc.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasMany<CartLine>()
-                .WithOne()
-                .HasForeignKey("UserCartId")
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

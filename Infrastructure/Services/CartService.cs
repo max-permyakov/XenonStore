@@ -88,10 +88,8 @@ namespace Xenon.Infrastructure.Services
             if (line == null)
                 throw new KeyNotFoundException($"Product {productId} not in cart");
 
-            if (quantity == 0)
-                cart.RemoveLine(line.Product);
-            else
-                line.Quantity = quantity;
+            if (quantity == 0) cart.RemoveLine(line.Product);
+            else line.Quantity = quantity;
 
             await storage.SaveAsync(cartId, cart);
         }

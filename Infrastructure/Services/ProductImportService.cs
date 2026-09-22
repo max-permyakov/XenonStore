@@ -29,10 +29,6 @@ public class ProductImportService
         using var reader = new StreamReader(csvStream);
         using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 
-        // Если в CSV нет заголовков, используйте:
-        // csv.Configuration.HasHeaderRecord = false;
-        // и тогда маппинг по индексам.
-
         var records = csv.GetRecords<ProductImportDto>().ToList();
         _logger.LogInformation($"Loaded {records.Count} records from CSV");
 

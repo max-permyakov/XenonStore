@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace Xenon.Infrastructure.Migrations
+namespace Xenon.Infrastructure.Migrations.StoreDb
 {
     /// <inheritdoc />
-    public partial class AddImages : Migration
+    public partial class UpdateModelSnapshot : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

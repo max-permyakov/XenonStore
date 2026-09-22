@@ -12,8 +12,8 @@ using Xenon.Infrastructure.Data;
 namespace Xenon.Infrastructure.Migrations.StoreDb
 {
     [DbContext(typeof(StoreDbContext))]
-    [Migration("20260817185531_FixDecimalPrecision")]
-    partial class FixDecimalPrecision
+    [Migration("20260818154005_DropUserCartUserId1")]
+    partial class DropUserCartUserId1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -132,10 +132,10 @@ namespace Xenon.Infrastructure.Migrations.StoreDb
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserCartId")
+                    b.Property<string>("UserCartUserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("UserCartUserId")
+                    b.Property<string>("UserCartUserId1")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("CartLineID");
@@ -144,9 +144,9 @@ namespace Xenon.Infrastructure.Migrations.StoreDb
 
                     b.HasIndex("ProductID");
 
-                    b.HasIndex("UserCartId");
-
                     b.HasIndex("UserCartUserId");
+
+                    b.HasIndex("UserCartUserId1");
 
                     b.ToTable("CartLine");
                 });
@@ -557,12 +557,12 @@ namespace Xenon.Infrastructure.Migrations.StoreDb
 
                     b.HasOne("Xenon.Domain.Models.UserCart", null)
                         .WithMany()
-                        .HasForeignKey("UserCartId")
+                        .HasForeignKey("UserCartUserId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Xenon.Domain.Models.UserCart", null)
                         .WithMany("Lines")
-                        .HasForeignKey("UserCartUserId");
+                        .HasForeignKey("UserCartUserId1");
 
                     b.Navigation("Product");
                 });
@@ -605,17 +605,6 @@ namespace Xenon.Infrastructure.Migrations.StoreDb
                     b.Navigation("Category");
 
                     b.Navigation("Supplier");
-                });
-
-            modelBuilder.Entity("Xenon.Domain.Models.UserCart", b =>
-                {
-                    b.HasOne("Xenon.Domain.Models.ApplicationUser", "User")
-                        .WithOne()
-                        .HasForeignKey("Xenon.Domain.Models.UserCart", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Xenon.Domain.Models.Category", b =>

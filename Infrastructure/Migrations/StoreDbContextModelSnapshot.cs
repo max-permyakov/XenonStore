@@ -109,7 +109,7 @@ namespace Xenon.Infrastructure.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("ApplicationUser");
+                    b.ToTable("ApplicationUser", (string)null);
                 });
 
             modelBuilder.Entity("Xenon.Domain.Models.CartLine", b =>
@@ -129,10 +129,10 @@ namespace Xenon.Infrastructure.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserCartId")
+                    b.Property<string>("UserCartUserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("UserCartUserId")
+                    b.Property<string>("UserCartUserId1")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("CartLineID");
@@ -141,11 +141,11 @@ namespace Xenon.Infrastructure.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.HasIndex("UserCartId");
-
                     b.HasIndex("UserCartUserId");
 
-                    b.ToTable("CartLine");
+                    b.HasIndex("UserCartUserId1");
+
+                    b.ToTable("CartLine", (string)null);
                 });
 
             modelBuilder.Entity("Xenon.Domain.Models.Category", b =>
@@ -166,7 +166,7 @@ namespace Xenon.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Xenon.Domain.Models.Favorite", b =>
@@ -275,7 +275,7 @@ namespace Xenon.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("LogEntries");
+                    b.ToTable("LogEntries", (string)null);
                 });
 
             modelBuilder.Entity("Xenon.Domain.Models.Notification", b =>
@@ -317,7 +317,7 @@ namespace Xenon.Infrastructure.Migrations
 
                     b.HasIndex("IsRead");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("Xenon.Domain.Models.Order", b =>
@@ -436,7 +436,7 @@ namespace Xenon.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("Xenon.Domain.Models.Product", b =>
@@ -492,7 +492,7 @@ namespace Xenon.Infrastructure.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("Xenon.Domain.Models.Supplier", b =>
@@ -517,7 +517,7 @@ namespace Xenon.Infrastructure.Migrations
 
                     b.HasIndex("Name");
 
-                    b.ToTable("Suppliers");
+                    b.ToTable("Suppliers", (string)null);
                 });
 
             modelBuilder.Entity("Xenon.Domain.Models.UserCart", b =>
@@ -527,7 +527,7 @@ namespace Xenon.Infrastructure.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("UserCarts");
+                    b.ToTable("UserCarts", (string)null);
                 });
 
             modelBuilder.Entity("Xenon.Domain.Models.ApplicationUser", b =>
@@ -554,12 +554,12 @@ namespace Xenon.Infrastructure.Migrations
 
                     b.HasOne("Xenon.Domain.Models.UserCart", null)
                         .WithMany()
-                        .HasForeignKey("UserCartId")
+                        .HasForeignKey("UserCartUserId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Xenon.Domain.Models.UserCart", null)
                         .WithMany("Lines")
-                        .HasForeignKey("UserCartUserId");
+                        .HasForeignKey("UserCartUserId1");
 
                     b.Navigation("Product");
                 });
@@ -602,17 +602,6 @@ namespace Xenon.Infrastructure.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("Supplier");
-                });
-
-            modelBuilder.Entity("Xenon.Domain.Models.UserCart", b =>
-                {
-                    b.HasOne("Xenon.Domain.Models.ApplicationUser", "User")
-                        .WithOne()
-                        .HasForeignKey("Xenon.Domain.Models.UserCart", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Xenon.Domain.Models.Category", b =>

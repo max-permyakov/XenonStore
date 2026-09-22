@@ -6,7 +6,6 @@ namespace Xenon.Domain.Models
     {
         [Required]
         public string UserId { get; set; } = string.Empty;
-        public ApplicationUser? User { get; set; }
         public ICollection<CartLine> Lines { get; set; } = new List<CartLine>();
     }
 }

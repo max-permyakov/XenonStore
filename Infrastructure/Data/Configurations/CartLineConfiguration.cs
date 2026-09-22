@@ -18,6 +18,18 @@ namespace Xenon.Infrastructure.Data.Configurations
                 .WithMany()
                 .HasForeignKey("ProductID")
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Связь с Order (для заказов)
+            builder.HasOne<Order>()
+                .WithMany(o => o.Lines)
+                .HasForeignKey(cl => cl.OrderID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Связь с UserCart (для корзины пользователя)
+            builder.HasOne<UserCart>()
+                .WithMany(uc => uc.Lines)
+                .HasForeignKey(cl => cl.UserCartUserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

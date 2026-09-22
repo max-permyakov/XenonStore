@@ -10,6 +10,9 @@ namespace Xenon.Infrastructure.Data.Configurations
         {
             builder.HasKey(p => p.ProductID);
 
+            builder.Property(p => p.ProductID)
+                .ValueGeneratedOnAdd();
+
             builder.Property(p => p.Name)
                 .IsRequired()
                 .HasMaxLength(200);

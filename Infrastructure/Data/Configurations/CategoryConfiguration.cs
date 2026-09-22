@@ -15,7 +15,7 @@ namespace Xenon.Infrastructure.Data.Configurations
                 .HasMaxLength(100);
 
             builder.HasIndex(c => c.Name)
-                .IsUnique(); // Имена категорий уникальны
+                .IsUnique(); 
         }
     }
 }
