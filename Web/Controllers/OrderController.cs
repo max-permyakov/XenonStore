@@ -116,7 +116,9 @@ namespace Xenon.Web.Controllers
             order.TotalAmount = subtotal + order.ShippingCost;
             order.PaymentStatus = PaymentStatus.Pending;
             order.Shipped = false;
-            order.Lines = cart.Lines.ToArray();
+            order.Lines = cart.Lines
+                .Select(l => new CartLine { Product = l.Product, Quantity = l.Quantity })
+                .ToList();
 
             repository.SaveOrder(order);
             await _cartService.ClearCartAsync(GetCartId());

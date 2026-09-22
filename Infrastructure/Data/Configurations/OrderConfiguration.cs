@@ -100,11 +100,6 @@ namespace Xenon.Infrastructure.Data.Configurations
             builder.Property(o => o.UserId)
                 .HasMaxLength(450);
 
-            builder.HasOne(o => o.User)
-                .WithMany()
-                .HasForeignKey(o => o.UserId)
-                .OnDelete(DeleteBehavior.SetNull);
-
             builder.HasIndex(o => o.UserId);
         }
     }
